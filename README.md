@@ -19,17 +19,16 @@
 ├── about.html             # 关于页
 ├── header.html            # 公共导航（片段，由 JS fetch 引入）
 ├── footer.html            # 公共页脚（片段，由 JS fetch 引入）
-├── post-plants-repot.html     # 示例文章：龟背竹翻盆
-├── post-fish-cycling.html     # 示例文章：开缸第 21 天
-├── post-guitar-barre.html     # 示例文章：横按和弦第一周
+├── post-plants-hydro.html     # 文章：五个水培瓶（合果芋 / 小仙女 / 山乌龟 / 大蒜 / 绿萝）
+├── post-fish-gufa.html        # 文章：古法缸（斑马鱼 / 观背青鳉 / 高珍珠 / 火焰红丁香）
+├── post-guitar-qiandou.html   # 文章：前奏、弹唱与基础乐理
 ├── assets/
 │   ├── css/
 │   │   └── style.css      # 全站样式（颜色用 CSS 变量，顶部统一改）
 │   ├── js/
 │   │   └── common.js      # 引入导航/页脚、当前页高亮、页脚年份
 │   └── img/               # 示例配图（可换成你自己的图床外链）
-│       ├── monstera-window.jpg
-│       ├── repot-hands.jpg
+│       ├── hydroponic-bottles.jpg
 │       ├── aquarium.jpg
 │       └── guitar-neck.jpg
 └── README.md              # 就是本文件，可删
@@ -115,7 +114,7 @@ fetch 失败时用内置的精简导航，页面不会白屏，只是样式和�
 <ul class="post-list">
   <li>
     <span class="post-date">2026-11-18</span>
-    <a class="post-link" href="./post-plants-repot.html">文章标题</a>
+    <a class="post-link" href="./post-plants-hydro.html">文章标题</a>
     <span class="post-tag is-plants">草木</span>
   </li>
 </ul>
@@ -127,7 +126,7 @@ fetch 失败时用内置的精简导航，页面不会白屏，只是样式和�
 
 ## 5. 文章页统一模板
 
-复制 `post-plants-repot.html` 改内容，或直接用下面这份空模板：
+复制 `post-plants-hydro.html` 改内容，或直接用下面这份空模板：
 
 ```html
 <!DOCTYPE html>
@@ -301,7 +300,7 @@ git push
 
 以在「草木生欢喜」加一篇为例：
 
-1. **复制** `post-plants-repot.html`，重命名为 `post-plants-light.html`
+1. **复制** `post-plants-hydro.html`，重命名为 `post-plants-light.html`
    （命名建议 `post-栏目-英文关键词.html`，全小写、用连字符）；
 2. 改 `<title>`、`<meta name="description">`；
 3. 改 `<h1>` 文章标题、`.meta` 里的日期和字数；
