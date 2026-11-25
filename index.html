@@ -1,273 +1,116 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>小丰收 · 个人博客</title>
-<style>
-  :root{
-    --bg:#faf6ef;
-    --card:#ffffff;
-    --border:#eee4d3;
-    --text:#2d2a24;
-    --text-2:#8a8172;
-    --primary:#d97706;
-    --primary-soft:#fef3e2;
-    --green:#5f8a3a;
-    --radius:16px;
-    --shadow:0 4px 16px rgba(120,90,40,.08);
-  }
-  *{margin:0;padding:0;box-sizing:border-box;font-family:"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;}
-  body{background:var(--bg);color:var(--text);line-height:1.7;}
-  a{color:inherit;text-decoration:none;}
-  img{max-width:100%;}
-
-  /* ===== 顶部导航 ===== */
-  header{
-    position:sticky;top:0;z-index:20;background:rgba(250,246,239,.9);
-    backdrop-filter:blur(10px);border-bottom:1px solid var(--border);
-  }
-  .nav{
-    max-width:1080px;margin:0 auto;padding:16px 24px;
-    display:flex;align-items:center;justify-content:space-between;
-  }
-  .logo{display:flex;align-items:center;gap:10px;font-size:20px;font-weight:700;}
-  .logo .mark{
-    width:36px;height:36px;border-radius:12px;background:var(--primary);color:#fff;
-    display:flex;align-items:center;justify-content:center;font-size:18px;
-  }
-  .logo small{font-size:12px;color:var(--text-2);font-weight:400;}
-  .nav-links{display:flex;gap:26px;font-size:14px;color:var(--text-2);}
-  .nav-links a{padding:4px 2px;transition:color .15s;}
-  .nav-links a:hover,.nav-links a.active{color:var(--primary);}
-
-  /* ===== Hero ===== */
-  .hero{
-    max-width:1080px;margin:32px auto 0;padding:0 24px;
-  }
-  .hero-inner{
-    background:linear-gradient(135deg,#fdeccd 0%,#fbe3c1 55%,#eef3df 100%);
-    border-radius:24px;padding:48px 40px;position:relative;overflow:hidden;
-  }
-  .hero-inner::after{
-    content:"🌾";position:absolute;right:36px;bottom:-10px;font-size:120px;opacity:.18;
-  }
-  .hero .hello{font-size:14px;color:var(--primary);letter-spacing:2px;margin-bottom:10px;}
-  .hero h1{font-size:34px;font-weight:700;margin-bottom:12px;}
-  .hero p{max-width:520px;color:var(--text-2);font-size:15px;}
-  .hero-tags{margin-top:18px;display:flex;gap:10px;flex-wrap:wrap;}
-  .chip{font-size:12.5px;padding:5px 14px;border-radius:20px;background:#fff;border:1px solid var(--border);color:var(--text-2);}
-
-  /* ===== 主体布局 ===== */
-  .wrap{max-width:1080px;margin:32px auto;padding:0 24px;display:grid;grid-template-columns:1fr 300px;gap:28px;}
-
-  /* 文章列表 */
-  .post-list{display:flex;flex-direction:column;gap:22px;}
-  .post{
-    background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
-    box-shadow:var(--shadow);overflow:hidden;display:grid;grid-template-columns:220px 1fr;
-    transition:transform .18s,box-shadow .18s;
-  }
-  .post:hover{transform:translateY(-3px);box-shadow:0 10px 24px rgba(120,90,40,.14);}
-  .cover{height:100%;min-height:150px;display:flex;align-items:center;justify-content:center;font-size:44px;}
-  .c1{background:linear-gradient(135deg,#fde2c4,#f9c88f);}
-  .c2{background:linear-gradient(135deg,#e6efd6,#bcd89a);}
-  .c3{background:linear-gradient(135deg,#fbe0e0,#f4b9b9);}
-  .c4{background:linear-gradient(135deg,#dbeafe,#bcd7f5);}
-  .post-body{padding:22px 24px;}
-  .post-meta{display:flex;align-items:center;gap:12px;font-size:12.5px;color:var(--text-2);margin-bottom:10px;}
-  .cat{color:var(--primary);background:var(--primary-soft);padding:2px 10px;border-radius:12px;}
-  .post-body h2{font-size:19px;margin-bottom:8px;}
-  .post-body h2 a:hover{color:var(--primary);}
-  .post-body p{font-size:14px;color:var(--text-2);margin-bottom:14px;}
-  .post-foot{display:flex;gap:18px;font-size:12.5px;color:var(--text-2);}
-
-  /* 分页 */
-  .pager{display:flex;gap:8px;justify-content:center;margin:30px 0;}
-  .pager a{
-    min-width:36px;height:36px;display:flex;align-items:center;justify-content:center;
-    border:1px solid var(--border);border-radius:10px;background:#fff;font-size:14px;
-  }
-  .pager a.cur{background:var(--primary);color:#fff;border-color:var(--primary);}
-
-  /* 侧边栏 */
-  aside{display:flex;flex-direction:column;gap:22px;}
-  .side-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:22px;}
-  .side-card h3{font-size:15px;margin-bottom:16px;display:flex;align-items:center;gap:8px;}
-  .about-avatar{
-    width:64px;height:64px;border-radius:50%;background:var(--primary-soft);
-    display:flex;align-items:center;justify-content:center;font-size:30px;margin-bottom:12px;
-  }
-  .side-card p{font-size:13.5px;color:var(--text-2);}
-  .cat-list{list-style:none;display:flex;flex-direction:column;gap:12px;font-size:14px;}
-  .cat-list li{display:flex;justify-content:space-between;color:var(--text-2);cursor:pointer;}
-  .cat-list li:hover{color:var(--primary);}
-  .cat-list span{color:var(--text-2);font-size:12.5px;}
-  .tag-cloud{display:flex;flex-wrap:wrap;gap:8px;}
-  .tag-cloud a{font-size:12.5px;padding:5px 12px;border-radius:14px;background:var(--bg);border:1px solid var(--border);color:var(--text-2);}
-  .tag-cloud a:hover{color:var(--primary);border-color:var(--primary);}
-  .recent{list-style:none;display:flex;flex-direction:column;gap:14px;}
-  .recent li{font-size:13.5px;}
-  .recent li small{display:block;color:var(--text-2);font-size:12px;}
-
-  /* 页脚 */
-  footer{
-    margin-top:40px;border-top:1px solid var(--border);padding:28px 24px;text-align:center;
-    color:var(--text-2);font-size:13px;
-  }
-  footer .social{display:flex;gap:18px;justify-content:center;margin-bottom:12px;font-size:18px;}
-
-  /* 响应式 */
-  @media(max-width:860px){
-    .wrap{grid-template-columns:1fr;}
-    .post{grid-template-columns:1fr;}
-    .cover{min-height:140px;}
-    .nav-links{gap:16px;}
-    .hero h1{font-size:26px;}
-  }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>小丰收 · 草木、水与指尖的日常记录</title>
+  <meta name="description" content="小丰收——草木、水与指尖的日常记录。绿植养护、养鱼水质、吉他练习，一点一滴装进人生的粮仓。">
+  <meta name="author" content="小丰收">
+  <link rel="stylesheet" href="./assets/css/style.css">
 </head>
-<body>
 
-<!-- 导航 -->
-<header>
-  <div class="nav">
-    <div class="logo">
-      <div class="mark">🌻</div>
-      <div>小丰收 <small>记录点滴，静待收成</small></div>
-    </div>
-    <nav class="nav-links">
-      <a href="#" class="active">首页</a>
-      <a href="#">归档</a>
-      <a href="#">分类</a>
-      <a href="#">标签</a>
-      <a href="#">关于</a>
-    </nav>
-  </div>
-</header>
+<!-- data-nav 决定导航栏哪个栏目高亮：home -->
+<body data-nav="home">
 
-<!-- Hero -->
-<section class="hero">
-  <div class="hero-inner">
-    <div class="hello">WELCOME TO MY BLOG</div>
-    <h1>你好，这里是小丰收 🌾</h1>
-    <p>在忙碌的生活里播种兴趣、记录思考与实践，慢慢积累，等待每一次小小的丰收。这里有技术笔记、生活随笔与读书心得。</p>
-    <div class="hero-tags">
-      <span class="chip"># 前端开发</span>
-      <span class="chip"># 读书笔记</span>
-      <span class="chip"># 生活随笔</span>
-      <span class="chip"># 效率工具</span>
-    </div>
-  </div>
-</section>
+  <!-- 导航栏：由 common.js 用 fetch 引入 header.html，不用在每个页面复制 -->
+  <div id="site-header"></div>
 
-<!-- 主体 -->
-<div class="wrap">
-  <!-- 文章列表 -->
-  <div>
-    <div class="post-list">
+  <main>
 
-      <article class="post">
-        <div class="cover c1">🍞</div>
-        <div class="post-body">
-          <div class="post-meta"><span class="cat">生活随笔</span><span>2026-11-22</span><span>阅读 1.2k</span></div>
-          <h2><a href="#">秋天的第一顿早餐：把日子过成喜欢的样子</a></h2>
-          <p>清晨的阳光、烤得微焦的面包和一杯热咖啡，是忙碌一天里最踏实的开始。聊聊我如何用简单的仪式感，把普通的早晨变得值得记录。</p>
-          <div class="post-foot"><span>🗂 随笔</span><span>💬 18 条评论</span><span>⭐ 收藏</span></div>
-        </div>
-      </article>
+    <!-- ==================== 站点头图 ==================== -->
+    <section class="hero">
+      <p class="eyebrow">PLANTS · WATER · FINGERS</p>
+      <h1>小丰收</h1>
+      <p class="slogan">所有微小而确定的小丰收，都值得装进人生的粮仓！</p>
 
-      <article class="post">
-        <div class="cover c2">💻</div>
-        <div class="post-body">
-          <div class="post-meta"><span class="cat">前端开发</span><span>2026-11-15</span><span>阅读 2.6k</span></div>
-          <h2><a href="#">从零搭一个属于自己的静态博客</a></h2>
-          <p>不依赖重型框架，用 HTML + CSS + 少量 JS 搭建轻量博客的全过程：目录结构、页面布局、响应式适配，以及部署到线上的几种方案。</p>
-          <div class="post-foot"><span>🗂 技术</span><span>💬 32 条评论</span><span>⭐ 收藏</span></div>
-        </div>
-      </article>
-
-      <article class="post">
-        <div class="cover c3">📚</div>
-        <div class="post-body">
-          <div class="post-meta"><span class="cat">读书笔记</span><span>2026-11-08</span><span>阅读 860</span></div>
-          <h2><a href="#">《原子习惯》读后：微小改变如何带来巨大收获</a></h2>
-          <p>习惯的复利效应常常被低估。梳理书中关于「身份—过程—结果」三层习惯模型的核心观点，以及我坚持打卡三个月后的真实体会。</p>
-          <div class="post-foot"><span>🗂 阅读</span><span>💬 12 条评论</span><span>⭐ 收藏</span></div>
-        </div>
-      </article>
-
-      <article class="post">
-        <div class="cover c4">🧰</div>
-        <div class="post-body">
-          <div class="post-meta"><span class="cat">效率工具</span><span>2026-10-30</span><span>阅读 1.9k</span></div>
-          <h2><a href="#">我的工作台清单：让效率翻倍的几款日常工具</a></h2>
-          <p>从笔记管理、待办规划到素材整理，分享我长期在用的一套工具组合。不求多而全，只选真正留在工作流里、持续产生价值的那几个。</p>
-          <div class="post-foot"><span>🗂 工具</span><span>💬 25 条评论</span><span>⭐ 收藏</span></div>
-        </div>
-      </article>
-
-    </div>
-
-    <!-- 分页 -->
-    <div class="pager">
-      <a href="#">‹</a>
-      <a href="#" class="cur">1</a>
-      <a href="#">2</a>
-      <a href="#">3</a>
-      <a href="#">…</a>
-      <a href="#">›</a>
-    </div>
-  </div>
-
-  <!-- 侧边栏 -->
-  <aside>
-    <div class="side-card">
-      <h3>🌱 关于我</h3>
-      <div class="about-avatar">👩‍🌾</div>
-      <p>喜欢写代码、读闲书、种点小植物。相信日积月累的力量，在这里分享工作与生活里的每一份小收获。</p>
-    </div>
-
-    <div class="side-card">
-      <h3>🗂 文章分类</h3>
-      <ul class="cat-list">
-        <li>前端开发 <span>12</span></li>
-        <li>生活随笔 <span>28</span></li>
-        <li>读书笔记 <span>9</span></li>
-        <li>效率工具 <span>15</span></li>
-        <li>旅行记录 <span>6</span></li>
-      </ul>
-    </div>
-
-    <div class="side-card">
-      <h3>🏷 热门标签</h3>
-      <div class="tag-cloud">
-        <a href="#">HTML</a><a href="#">CSS</a><a href="#">JavaScript</a>
-        <a href="#">习惯养成</a><a href="#">读书</a><a href="#">自律</a>
-        <a href="#">写作</a><a href="#">开源</a><a href="#">生活方式</a>
+      <!-- 三个小贴纸，纯装饰，可删 -->
+      <div class="hero-stickers">
+        <span>草木</span>
+        <span>水</span>
+        <span>指尖</span>
       </div>
-    </div>
+    </section>
 
-    <div class="side-card">
-      <h3>📌 最近更新</h3>
-      <ul class="recent">
-        <li>秋天的第一顿早餐<small>2026-11-22</small></li>
-        <li>从零搭一个静态博客<small>2026-11-15</small></li>
-        <li>《原子习惯》读后<small>2026-11-08</small></li>
-        <li>我的工作台清单<small>2026-10-30</small></li>
+    <!-- ==================== 三个栏目入口卡片 ==================== -->
+    <section class="section">
+      <div class="section-head">
+        <h2 class="section-title">三个小栏目</h2>
+        <span class="section-more">慢慢写，慢慢长</span>
+      </div>
+
+      <div class="cards">
+
+        <!-- 卡片 1：草木生欢喜 -->
+        <a class="card is-plants" href="./plants.html">
+          <span class="card-tag">草木</span>
+          <h3 class="card-title">草木生欢喜</h3>
+          <p class="card-sub">绿植养护 · 生长 · 翻盆</p>
+          <p class="card-desc">龟背竹的新叶、绿萝的根、翻盆时抖落的旧土。记录一株植物从春天到冬天。</p>
+          <div class="card-foot">
+            <span>共 1 篇</span>
+            <span class="card-arrow">进入 →</span>
+          </div>
+        </a>
+
+        <!-- 卡片 2：水中小世界 -->
+        <a class="card is-fish" href="./fish.html">
+          <span class="card-tag">水</span>
+          <h3 class="card-title">水中小世界</h3>
+          <p class="card-sub">养鱼日常 · 水质 · 造景</p>
+          <p class="card-desc">开缸、养水、换水的第几天。一缸清水养起来，比想象中更需要耐心。</p>
+          <div class="card-foot">
+            <span>共 1 篇</span>
+            <span class="card-arrow">进入 →</span>
+          </div>
+        </a>
+
+        <!-- 卡片 3：指尖流水 -->
+        <a class="card is-guitar" href="./guitar.html">
+          <span class="card-tag">指尖</span>
+          <h3 class="card-title">指尖流水</h3>
+          <p class="card-sub">吉他笔记 · 和弦 · 曲子</p>
+          <p class="card-desc">从爬格子到第一首完整的曲子。手指的记忆，是一点一点长出来的。</p>
+          <div class="card-foot">
+            <span>共 1 篇</span>
+            <span class="card-arrow">进入 →</span>
+          </div>
+        </a>
+
+      </div>
+    </section>
+
+    <!-- ==================== 最新文章列表 ==================== -->
+    <!-- 新增文章时：在这一段里加一个 <li>，日期新的放最上面 -->
+    <section class="section">
+      <div class="section-head">
+        <h2 class="section-title">最新记录</h2>
+        <span class="section-more">最近写下的几页</span>
+      </div>
+
+      <ul class="post-list">
+        <li>
+          <span class="post-date">2026-11-18</span>
+          <a class="post-link" href="./post-plants-repot.html">给龟背竹翻盆：一次迟到了半年的搬家</a>
+          <span class="post-tag is-plants">草木</span>
+        </li>
+        <li>
+          <span class="post-date">2026-11-10</span>
+          <a class="post-link" href="./post-fish-cycling.html">开缸第 21 天：水质终于稳住了</a>
+          <span class="post-tag is-fish">水</span>
+        </li>
+        <li>
+          <span class="post-date">2026-11-02</span>
+          <a class="post-link" href="./post-guitar-barre.html">横按和弦的第一周：从按不响到按得响</a>
+          <span class="post-tag is-guitar">指尖</span>
+        </li>
       </ul>
-    </div>
-  </aside>
-</div>
+    </section>
 
-<footer>
-  <div class="social">
-    <a href="#" title="邮箱">✉️</a>
-    <a href="#" title="GitHub">🐙</a>
-    <a href="#" title="RSS">📡</a>
-  </div>
-  <div>© 2026 小丰收 · 记录点滴，静待收成</div>
-</footer>
+  </main>
 
+  <!-- 页脚：同样由 common.js 引入 footer.html -->
+  <div id="site-footer"></div>
+
+  <script src="./assets/js/common.js"></script>
 </body>
 </html>

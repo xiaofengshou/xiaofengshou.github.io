@@ -1,0 +1,30 @@
+<!--
+  小丰收 · 全站导航（公共片段）
+  ------------------------------------------------------------
+  这个文件不单独当页面用，由 assets/js/common.js 用 fetch 引入到
+  每个页面的 <div id="site-header"></div> 里。
+  改这里 = 全站导航同步更新。
+  data-nav 的值用于当前页高亮，和文件名对应：
+  home / plants / fish / guitar / about
+-->
+<header class="site-header">
+  <div class="header-inner">
+
+    <a class="brand" href="./index.html">
+      <span class="brand-mark">丰</span>
+      <span class="brand-text">
+        <strong>小丰收</strong>
+        <small>XIAO FENG SHOU</small>
+      </span>
+    </a>
+
+    <nav class="nav" aria-label="主导航">
+      <a href="./index.html" data-nav="home">首页</a>
+      <a href="./plants.html" data-nav="plants">草木生欢喜</a>
+      <a href="./fish.html" data-nav="fish">水中小世界</a>
+      <a href="./guitar.html" data-nav="guitar">指尖流水<span class="nav-sub">吉他笔记</span></a>
+      <a href="./about.html" data-nav="about">关于</a>
+    </nav>
+
+  </div>
+</header>
