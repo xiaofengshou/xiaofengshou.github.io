@@ -3,575 +3,271 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>统一服务工具 · 测试界面</title>
+<title>小丰收 · 个人博客</title>
 <style>
   :root{
-    --bg:#f3f3f3;
+    --bg:#faf6ef;
     --card:#ffffff;
-    --card-2:#fafafa;
-    --border:#e5e7eb;
-    --text:#1f2937;
-    --text-2:#6b7280;
-    --primary:#0067c0;
-    --primary-hover:#005a9e;
-    --green:#107c10;
-    --red:#c42b1c;
-    --orange:#ca5010;
-    --radius:12px;
-    --shadow:0 2px 10px rgba(0,0,0,.06);
+    --border:#eee4d3;
+    --text:#2d2a24;
+    --text-2:#8a8172;
+    --primary:#d97706;
+    --primary-soft:#fef3e2;
+    --green:#5f8a3a;
+    --radius:16px;
+    --shadow:0 4px 16px rgba(120,90,40,.08);
   }
-  *{margin:0;padding:0;box-sizing:border-box;font-family:"Segoe UI","Microsoft YaHei",sans-serif;}
-  body{background:var(--bg);color:var(--text);height:100vh;overflow:hidden;}
+  *{margin:0;padding:0;box-sizing:border-box;font-family:"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;}
+  body{background:var(--bg);color:var(--text);line-height:1.7;}
+  a{color:inherit;text-decoration:none;}
+  img{max-width:100%;}
 
-  /* ===== 顶栏 ===== */
+  /* ===== 顶部导航 ===== */
   header{
-    height:52px;background:var(--card);border-bottom:1px solid var(--border);
-    display:flex;align-items:center;justify-content:space-between;padding:0 20px;
-    box-shadow:0 1px 4px rgba(0,0,0,.05);
+    position:sticky;top:0;z-index:20;background:rgba(250,246,239,.9);
+    backdrop-filter:blur(10px);border-bottom:1px solid var(--border);
   }
-  .brand{display:flex;align-items:center;gap:10px;font-size:16px;font-weight:600;}
-  .brand .logo{width:28px;height:28px;border-radius:8px;background:var(--primary);display:flex;align-items:center;justify-content:center;color:#fff;font-size:15px;}
-  .brand small{font-weight:400;color:var(--text-2);font-size:12px;margin-left:4px;}
-  .header-right{display:flex;align-items:center;gap:16px;font-size:13px;color:var(--text-2);}
-  .status-pill{display:flex;align-items:center;gap:6px;padding:5px 12px;border-radius:20px;background:var(--card-2);border:1px solid var(--border);}
-  .dot{width:8px;height:8px;border-radius:50%;background:#9ca3af;}
-  .dot.on{background:var(--green);box-shadow:0 0 6px rgba(16,124,16,.5);}
-
-  /* ===== 布局 ===== */
-  .layout{display:flex;height:calc(100vh - 52px);}
-  nav{
-    width:220px;background:var(--card);border-right:1px solid var(--border);
-    padding:12px 10px;display:flex;flex-direction:column;gap:4px;
+  .nav{
+    max-width:1080px;margin:0 auto;padding:16px 24px;
+    display:flex;align-items:center;justify-content:space-between;
   }
-  .nav-group{font-size:12px;color:var(--text-2);padding:10px 12px 6px;}
-  .nav-item{
-    display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;
-    cursor:pointer;font-size:14px;color:var(--text);transition:background .15s;
+  .logo{display:flex;align-items:center;gap:10px;font-size:20px;font-weight:700;}
+  .logo .mark{
+    width:36px;height:36px;border-radius:12px;background:var(--primary);color:#fff;
+    display:flex;align-items:center;justify-content:center;font-size:18px;
   }
-  .nav-item:hover{background:var(--card-2);}
-  .nav-item.active{background:#e8f1fb;color:var(--primary);font-weight:600;}
-  .nav-item .ico{width:18px;text-align:center;}
+  .logo small{font-size:12px;color:var(--text-2);font-weight:400;}
+  .nav-links{display:flex;gap:26px;font-size:14px;color:var(--text-2);}
+  .nav-links a{padding:4px 2px;transition:color .15s;}
+  .nav-links a:hover,.nav-links a.active{color:var(--primary);}
 
-  main{flex:1;padding:20px;overflow-y:auto;}
-  .view{display:none;animation:fade .18s;}
-  .view.active{display:block;}
-  @keyframes fade{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:none;}}
+  /* ===== Hero ===== */
+  .hero{
+    max-width:1080px;margin:32px auto 0;padding:0 24px;
+  }
+  .hero-inner{
+    background:linear-gradient(135deg,#fdeccd 0%,#fbe3c1 55%,#eef3df 100%);
+    border-radius:24px;padding:48px 40px;position:relative;overflow:hidden;
+  }
+  .hero-inner::after{
+    content:"🌾";position:absolute;right:36px;bottom:-10px;font-size:120px;opacity:.18;
+  }
+  .hero .hello{font-size:14px;color:var(--primary);letter-spacing:2px;margin-bottom:10px;}
+  .hero h1{font-size:34px;font-weight:700;margin-bottom:12px;}
+  .hero p{max-width:520px;color:var(--text-2);font-size:15px;}
+  .hero-tags{margin-top:18px;display:flex;gap:10px;flex-wrap:wrap;}
+  .chip{font-size:12.5px;padding:5px 14px;border-radius:20px;background:#fff;border:1px solid var(--border);color:var(--text-2);}
 
-  .page-title{font-size:18px;font-weight:600;margin-bottom:4px;}
-  .page-desc{font-size:13px;color:var(--text-2);margin-bottom:18px;}
+  /* ===== 主体布局 ===== */
+  .wrap{max-width:1080px;margin:32px auto;padding:0 24px;display:grid;grid-template-columns:1fr 300px;gap:28px;}
 
-  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;}
-  .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
-  .card{
+  /* 文章列表 */
+  .post-list{display:flex;flex-direction:column;gap:22px;}
+  .post{
     background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
-    box-shadow:var(--shadow);padding:18px;
+    box-shadow:var(--shadow);overflow:hidden;display:grid;grid-template-columns:220px 1fr;
+    transition:transform .18s,box-shadow .18s;
   }
-  .card h3{font-size:14px;margin-bottom:14px;font-weight:600;}
+  .post:hover{transform:translateY(-3px);box-shadow:0 10px 24px rgba(120,90,40,.14);}
+  .cover{height:100%;min-height:150px;display:flex;align-items:center;justify-content:center;font-size:44px;}
+  .c1{background:linear-gradient(135deg,#fde2c4,#f9c88f);}
+  .c2{background:linear-gradient(135deg,#e6efd6,#bcd89a);}
+  .c3{background:linear-gradient(135deg,#fbe0e0,#f4b9b9);}
+  .c4{background:linear-gradient(135deg,#dbeafe,#bcd7f5);}
+  .post-body{padding:22px 24px;}
+  .post-meta{display:flex;align-items:center;gap:12px;font-size:12.5px;color:var(--text-2);margin-bottom:10px;}
+  .cat{color:var(--primary);background:var(--primary-soft);padding:2px 10px;border-radius:12px;}
+  .post-body h2{font-size:19px;margin-bottom:8px;}
+  .post-body h2 a:hover{color:var(--primary);}
+  .post-body p{font-size:14px;color:var(--text-2);margin-bottom:14px;}
+  .post-foot{display:flex;gap:18px;font-size:12.5px;color:var(--text-2);}
 
-  /* ===== 表单 ===== */
-  .field{margin-bottom:14px;}
-  .field label{display:block;font-size:13px;color:var(--text-2);margin-bottom:6px;}
-  .field input,.field select,.field textarea{
-    width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:8px;
-    font-size:13px;background:#fff;outline:none;transition:border .15s;
+  /* 分页 */
+  .pager{display:flex;gap:8px;justify-content:center;margin:30px 0;}
+  .pager a{
+    min-width:36px;height:36px;display:flex;align-items:center;justify-content:center;
+    border:1px solid var(--border);border-radius:10px;background:#fff;font-size:14px;
   }
-  .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--primary);}
-  .field textarea{resize:vertical;font-family:Consolas,monospace;}
-  .row{display:flex;gap:12px;}
-  .row .field{flex:1;}
+  .pager a.cur{background:var(--primary);color:#fff;border-color:var(--primary);}
 
-  .btn{
-    padding:9px 18px;border:none;border-radius:8px;background:var(--primary);color:#fff;
-    font-size:13px;cursor:pointer;transition:background .15s;
+  /* 侧边栏 */
+  aside{display:flex;flex-direction:column;gap:22px;}
+  .side-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:22px;}
+  .side-card h3{font-size:15px;margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+  .about-avatar{
+    width:64px;height:64px;border-radius:50%;background:var(--primary-soft);
+    display:flex;align-items:center;justify-content:center;font-size:30px;margin-bottom:12px;
   }
-  .btn:hover{background:var(--primary-hover);}
-  .btn.ghost{background:#fff;border:1px solid var(--border);color:var(--text);}
-  .btn.ghost:hover{background:var(--card-2);}
-  .btn.danger{background:var(--red);}
-  .btn.ok{background:var(--green);}
-  .btn:disabled{opacity:.5;cursor:not-allowed;}
-  .btn-row{display:flex;gap:10px;margin-top:8px;flex-wrap:wrap;}
+  .side-card p{font-size:13.5px;color:var(--text-2);}
+  .cat-list{list-style:none;display:flex;flex-direction:column;gap:12px;font-size:14px;}
+  .cat-list li{display:flex;justify-content:space-between;color:var(--text-2);cursor:pointer;}
+  .cat-list li:hover{color:var(--primary);}
+  .cat-list span{color:var(--text-2);font-size:12.5px;}
+  .tag-cloud{display:flex;flex-wrap:wrap;gap:8px;}
+  .tag-cloud a{font-size:12.5px;padding:5px 12px;border-radius:14px;background:var(--bg);border:1px solid var(--border);color:var(--text-2);}
+  .tag-cloud a:hover{color:var(--primary);border-color:var(--primary);}
+  .recent{list-style:none;display:flex;flex-direction:column;gap:14px;}
+  .recent li{font-size:13.5px;}
+  .recent li small{display:block;color:var(--text-2);font-size:12px;}
 
-  /* ===== 表格 ===== */
-  table{width:100%;border-collapse:collapse;font-size:13px;}
-  th,td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--border);}
-  th{color:var(--text-2);font-weight:500;font-size:12px;background:var(--card-2);}
-  tr:last-child td{border-bottom:none;}
-  .tag{display:inline-block;padding:2px 10px;border-radius:12px;font-size:12px;}
-  .tag.ok{background:#e7f4e7;color:var(--green);}
-  .tag.err{background:#fbe9e7;color:var(--red);}
-  .tag.warn{background:#fdf0e6;color:var(--orange);}
-  .tag.info{background:#e8f1fb;color:var(--primary);}
-
-  /* ===== 进度步骤 ===== */
-  .steps{display:flex;gap:0;margin-bottom:20px;}
-  .step{flex:1;text-align:center;position:relative;padding-top:28px;font-size:13px;}
-  .step::before{
-    content:"";position:absolute;top:13px;left:0;right:0;height:2px;background:var(--border);
-  }
-  .step:first-child::before{left:50%;}
-  .step:last-child::before{right:50%;}
-  .step .circle{
-    position:absolute;top:6px;left:50%;transform:translateX(-50%);width:16px;height:16px;
-    border-radius:50%;background:#fff;border:2px solid var(--border);z-index:1;
-  }
-  .step.done .circle{background:var(--green);border-color:var(--green);}
-  .step.done::before{background:var(--green);}
-  .step.active .circle{border-color:var(--primary);background:#e8f1fb;}
-  .step.active{color:var(--primary);font-weight:600;}
-  .step.fail .circle{background:var(--red);border-color:var(--red);}
-
-  /* ===== 日志控制台 ===== */
-  .console{
-    background:#1e1e1e;color:#d4d4d4;border-radius:10px;padding:14px;font-family:Consolas,monospace;
-    font-size:12.5px;height:340px;overflow-y:auto;line-height:1.7;
-  }
-  .console .line{white-space:pre-wrap;}
-  .console .t{color:#858585;}
-  .console .lv-info{color:#4fc1ff;}
-  .console .lv-ok{color:#6aaf6a;}
-  .console .lv-warn{color:#e8b339;}
-  .console .lv-err{color:#f48771;}
-
-  /* ===== 状态栏 ===== */
+  /* 页脚 */
   footer{
-    height:30px;background:var(--card);border-top:1px solid var(--border);
-    display:flex;align-items:center;justify-content:space-between;padding:0 20px;
-    font-size:12px;color:var(--text-2);
+    margin-top:40px;border-top:1px solid var(--border);padding:28px 24px;text-align:center;
+    color:var(--text-2);font-size:13px;
   }
-  .switch{display:flex;align-items:center;gap:8px;}
-  .switch input{width:16px;height:16px;}
+  footer .social{display:flex;gap:18px;justify-content:center;margin-bottom:12px;font-size:18px;}
+
+  /* 响应式 */
+  @media(max-width:860px){
+    .wrap{grid-template-columns:1fr;}
+    .post{grid-template-columns:1fr;}
+    .cover{min-height:140px;}
+    .nav-links{gap:16px;}
+    .hero h1{font-size:26px;}
+  }
 </style>
 </head>
 <body>
 
+<!-- 导航 -->
 <header>
-  <div class="brand">
-    <div class="logo">U</div>
-    统一服务工具 <small>Unified Service Tool · 测试界面 v1.0</small>
-  </div>
-  <div class="header-right">
-    <div class="status-pill"><span class="dot" id="connDot"></span><span id="connText">未连接</span></div>
-    <span>操作员：admin</span>
+  <div class="nav">
+    <div class="logo">
+      <div class="mark">🌻</div>
+      <div>小丰收 <small>记录点滴，静待收成</small></div>
+    </div>
+    <nav class="nav-links">
+      <a href="#" class="active">首页</a>
+      <a href="#">归档</a>
+      <a href="#">分类</a>
+      <a href="#">标签</a>
+      <a href="#">关于</a>
+    </nav>
   </div>
 </header>
 
-<div class="layout">
-  <!-- ===== 左侧导航 ===== -->
-  <nav>
-    <div class="nav-group">功能模块</div>
-    <div class="nav-item active" data-view="conn"><span class="ico">🔌</span>连接管理</div>
-    <div class="nav-item" data-view="diag"><span class="ico">🛠️</span>诊断服务 (UDS)</div>
-    <div class="nav-item" data-view="flash"><span class="ico">💿</span>刷写流程</div>
-    <div class="nav-item" data-view="monitor"><span class="ico">📈</span>信号监控</div>
-    <div class="nav-item" data-view="dtc"><span class="ico">⚠️</span>DTC 故障码</div>
-    <div class="nav-item" data-view="log"><span class="ico">📋</span>日志记录</div>
-    <div class="nav-group">系统</div>
-    <div class="nav-item" data-view="setting"><span class="ico">⚙️</span>系统设置</div>
-  </nav>
+<!-- Hero -->
+<section class="hero">
+  <div class="hero-inner">
+    <div class="hello">WELCOME TO MY BLOG</div>
+    <h1>你好，这里是小丰收 🌾</h1>
+    <p>在忙碌的生活里播种兴趣、记录思考与实践，慢慢积累，等待每一次小小的丰收。这里有技术笔记、生活随笔与读书心得。</p>
+    <div class="hero-tags">
+      <span class="chip"># 前端开发</span>
+      <span class="chip"># 读书笔记</span>
+      <span class="chip"># 生活随笔</span>
+      <span class="chip"># 效率工具</span>
+    </div>
+  </div>
+</section>
 
-  <main>
-    <!-- ===== 视图：连接管理 ===== -->
-    <section class="view active" id="view-conn">
-      <div class="page-title">连接管理</div>
-      <div class="page-desc">配置 CAN 通道、波特率与诊断寻址参数，建立与电控单元（ECU）的通信链路。</div>
-      <div class="grid">
-        <div class="card">
-          <h3>通信参数</h3>
-          <div class="row">
-            <div class="field">
-              <label>CAN 通道</label>
-              <select id="canChannel">
-                <option>Channel 0 (USB-CAN 1)</option>
-                <option>Channel 1 (USB-CAN 2)</option>
-                <option>Virtual Channel</option>
-              </select>
-            </div>
-            <div class="field">
-              <label>波特率</label>
-              <select id="canBaud">
-                <option>500 kbps</option>
-                <option>250 kbps</option>
-                <option>125 kbps</option>
-                <option>1 Mbps</option>
-              </select>
-            </div>
-          </div>
-          <div class="row">
-            <div class="field">
-              <label>请求 ID (Tx)</label>
-              <input id="txId" value="0x7E0">
-            </div>
-            <div class="field">
-              <label>响应 ID (Rx)</label>
-              <input id="rxId" value="0x7E8">
-            </div>
-          </div>
-          <div class="field">
-            <label>响应超时 (ms)</label>
-            <input id="timeout" value="1000">
-          </div>
-          <div class="btn-row">
-            <button class="btn" id="btnConnect">建立连接</button>
-            <button class="btn ghost" id="btnDisconnect" disabled>断开连接</button>
-          </div>
-        </div>
+<!-- 主体 -->
+<div class="wrap">
+  <!-- 文章列表 -->
+  <div>
+    <div class="post-list">
 
-        <div class="card">
-          <h3>链路状态</h3>
-          <table>
-            <tr><td style="width:45%">连接状态</td><td><span class="tag info" id="stConn">未连接</span></td></tr>
-            <tr><td>硬件设备</td><td id="stDev">—</td></tr>
-            <tr><td>总线负载</td><td id="stLoad">—</td></tr>
-            <tr><td>已收发报文</td><td id="stFrames">0</td></tr>
-            <tr><td>最近心跳</td><td id="stHeart">—</td></tr>
-          </table>
-          <div class="btn-row">
-            <button class="btn ghost" onclick="addLog('info','手动刷新链路状态完成。')">刷新状态</button>
-            <button class="btn ghost" onclick="addLog('warn','已发送总线复位请求（模拟）。')">总线复位</button>
-          </div>
+      <article class="post">
+        <div class="cover c1">🍞</div>
+        <div class="post-body">
+          <div class="post-meta"><span class="cat">生活随笔</span><span>2026-11-22</span><span>阅读 1.2k</span></div>
+          <h2><a href="#">秋天的第一顿早餐：把日子过成喜欢的样子</a></h2>
+          <p>清晨的阳光、烤得微焦的面包和一杯热咖啡，是忙碌一天里最踏实的开始。聊聊我如何用简单的仪式感，把普通的早晨变得值得记录。</p>
+          <div class="post-foot"><span>🗂 随笔</span><span>💬 18 条评论</span><span>⭐ 收藏</span></div>
         </div>
+      </article>
+
+      <article class="post">
+        <div class="cover c2">💻</div>
+        <div class="post-body">
+          <div class="post-meta"><span class="cat">前端开发</span><span>2026-11-15</span><span>阅读 2.6k</span></div>
+          <h2><a href="#">从零搭一个属于自己的静态博客</a></h2>
+          <p>不依赖重型框架，用 HTML + CSS + 少量 JS 搭建轻量博客的全过程：目录结构、页面布局、响应式适配，以及部署到线上的几种方案。</p>
+          <div class="post-foot"><span>🗂 技术</span><span>💬 32 条评论</span><span>⭐ 收藏</span></div>
+        </div>
+      </article>
+
+      <article class="post">
+        <div class="cover c3">📚</div>
+        <div class="post-body">
+          <div class="post-meta"><span class="cat">读书笔记</span><span>2026-11-08</span><span>阅读 860</span></div>
+          <h2><a href="#">《原子习惯》读后：微小改变如何带来巨大收获</a></h2>
+          <p>习惯的复利效应常常被低估。梳理书中关于「身份—过程—结果」三层习惯模型的核心观点，以及我坚持打卡三个月后的真实体会。</p>
+          <div class="post-foot"><span>🗂 阅读</span><span>💬 12 条评论</span><span>⭐ 收藏</span></div>
+        </div>
+      </article>
+
+      <article class="post">
+        <div class="cover c4">🧰</div>
+        <div class="post-body">
+          <div class="post-meta"><span class="cat">效率工具</span><span>2026-10-30</span><span>阅读 1.9k</span></div>
+          <h2><a href="#">我的工作台清单：让效率翻倍的几款日常工具</a></h2>
+          <p>从笔记管理、待办规划到素材整理，分享我长期在用的一套工具组合。不求多而全，只选真正留在工作流里、持续产生价值的那几个。</p>
+          <div class="post-foot"><span>🗂 工具</span><span>💬 25 条评论</span><span>⭐ 收藏</span></div>
+        </div>
+      </article>
+
+    </div>
+
+    <!-- 分页 -->
+    <div class="pager">
+      <a href="#">‹</a>
+      <a href="#" class="cur">1</a>
+      <a href="#">2</a>
+      <a href="#">3</a>
+      <a href="#">…</a>
+      <a href="#">›</a>
+    </div>
+  </div>
+
+  <!-- 侧边栏 -->
+  <aside>
+    <div class="side-card">
+      <h3>🌱 关于我</h3>
+      <div class="about-avatar">👩‍🌾</div>
+      <p>喜欢写代码、读闲书、种点小植物。相信日积月累的力量，在这里分享工作与生活里的每一份小收获。</p>
+    </div>
+
+    <div class="side-card">
+      <h3>🗂 文章分类</h3>
+      <ul class="cat-list">
+        <li>前端开发 <span>12</span></li>
+        <li>生活随笔 <span>28</span></li>
+        <li>读书笔记 <span>9</span></li>
+        <li>效率工具 <span>15</span></li>
+        <li>旅行记录 <span>6</span></li>
+      </ul>
+    </div>
+
+    <div class="side-card">
+      <h3>🏷 热门标签</h3>
+      <div class="tag-cloud">
+        <a href="#">HTML</a><a href="#">CSS</a><a href="#">JavaScript</a>
+        <a href="#">习惯养成</a><a href="#">读书</a><a href="#">自律</a>
+        <a href="#">写作</a><a href="#">开源</a><a href="#">生活方式</a>
       </div>
-    </section>
+    </div>
 
-    <!-- ===== 视图：诊断服务 ===== -->
-    <section class="view" id="view-diag">
-      <div class="page-title">诊断服务 (UDS)</div>
-      <div class="page-desc">按 ISO 14229 构造诊断请求，手动发送并查看 ECU 响应报文。</div>
-      <div class="grid">
-        <div class="card">
-          <h3>请求构造</h3>
-          <div class="row">
-            <div class="field">
-              <label>服务 ID (SID)</label>
-              <select id="sid" onchange="fillRequest()">
-                <option value="10">0x10 会话控制</option>
-                <option value="22">0x22 读数据记录 (ReadDataByIdentifier)</option>
-                <option value="27">0x27 安全访问</option>
-                <option value="31">0x31 例程控制</option>
-                <option value="3E">0x3E 会话保持</option>
-              </select>
-            </div>
-            <div class="field">
-              <label>子功能 / 子参数</label>
-              <input id="subFunc" value="03">
-            </div>
-          </div>
-          <div class="field">
-            <label>数据标识符 (DID / 参数)</label>
-            <input id="did" value="F1 90">
-          </div>
-          <div class="field">
-            <label>请求报文 (HEX)</label>
-            <textarea id="reqHex" rows="3">10 03</textarea>
-          </div>
-          <div class="switch field">
-            <input type="checkbox" id="autoTester"> <label style="margin:0">启用定时会话保持 (0x3E)</label>
-          </div>
-          <div class="btn-row">
-            <button class="btn" id="btnSend">发送请求</button>
-            <button class="btn ghost" onclick="document.getElementById('reqHex').value='';addLog('info','已清空请求报文。')">清空</button>
-          </div>
-        </div>
-
-        <div class="card">
-          <h3>响应报文</h3>
-          <div class="field">
-            <label>原始响应 (HEX)</label>
-            <textarea id="respHex" rows="3" readonly placeholder="等待响应…"></textarea>
-          </div>
-          <table>
-            <tr><td style="width:45%">响应状态</td><td><span class="tag info" id="respStatus">—</span></td></tr>
-            <tr><td>正响应 SID</td><td id="respSid">—</td></tr>
-            <tr><td>响应耗时</td><td id="respTime">—</td></tr>
-            <tr><td>NRC 否定码</td><td id="respNrc">—</td></tr>
-          </table>
-          <div class="btn-row">
-            <button class="btn ghost" onclick="addLog('info','响应报文已导出（模拟）。')">导出日志</button>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ===== 视图：刷写流程 ===== -->
-    <section class="view" id="view-flash">
-      <div class="page-title">刷写流程</div>
-      <div class="page-desc">引导式固件刷写：连接 SBL → 擦除 → 数据下载 → 校验 → 启动应用程序。</div>
-      <div class="card" style="margin-bottom:16px;">
-        <div class="steps">
-          <div class="step active" id="step0"><div class="circle"></div>SBL 连接</div>
-          <div class="step" id="step1"><div class="circle"></div>擦除 Flash</div>
-          <div class="step" id="step2"><div class="circle"></div>数据下载</div>
-          <div class="step" id="step3"><div class="circle"></div>完整性校验</div>
-          <div class="step" id="step4"><div class="circle"></div>启动应用</div>
-        </div>
-      </div>
-      <div class="grid">
-        <div class="card">
-          <h3>固件信息</h3>
-          <div class="field"><label>固件文件</label><input value="ECU_APP_v2.3.1.s19" readonly></div>
-          <div class="field"><label>版本号</label><input value="2.3.1" readonly></div>
-          <div class="field"><label>文件大小</label><input value="1.42 MB" readonly></div>
-          <div class="field"><label>校验方式</label><select><option>CRC32</option><option>SHA-256</option></select></div>
-        </div>
-        <div class="card">
-          <h3>执行控制</h3>
-          <table>
-            <tr><td style="width:45%">当前阶段</td><td id="flashStage">等待开始</td></tr>
-            <tr><td>下载进度</td><td id="flashProgress">0%</td></tr>
-            <tr><td>已传输块</td><td id="flashBlocks">0 / 0</td></tr>
-          </table>
-          <div class="btn-row">
-            <button class="btn ok" id="btnFlash">开始刷写</button>
-            <button class="btn danger" id="btnFlashStop" disabled>中止</button>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ===== 视图：信号监控 ===== -->
-    <section class="view" id="view-monitor">
-      <div class="page-title">信号监控</div>
-      <div class="page-desc">实时监控总线上的关键信号值与周期报文。</div>
-      <div class="card">
-        <table>
-          <thead><tr><th>信号名称</th><th>CAN ID</th><th>周期 (ms)</th><th>当前值</th><th>单位</th><th>状态</th></tr></thead>
-          <tbody id="signalBody">
-            <tr><td>发动机转速</td><td>0x1A0</td><td>10</td><td id="sig1">856</td><td>rpm</td><td><span class="tag ok">正常</span></td></tr>
-            <tr><td>车速</td><td>0x1A1</td><td>20</td><td id="sig2">42</td><td>km/h</td><td><span class="tag ok">正常</span></td></tr>
-            <tr><td>冷却液温度</td><td>0x1A2</td><td>50</td><td id="sig3">87</td><td>℃</td><td><span class="tag warn">偏高</span></td></tr>
-            <tr><td>蓄电池电压</td><td>0x1A3</td><td>100</td><td id="sig4">12.4</td><td>V</td><td><span class="tag ok">正常</span></td></tr>
-            <tr><td>制动压力</td><td>0x1A4</td><td>20</td><td id="sig5">0.0</td><td>MPa</td><td><span class="tag ok">正常</span></td></tr>
-          </tbody>
-        </table>
-        <div class="btn-row">
-          <button class="btn ghost" onclick="addLog('info','已暂停信号刷新（模拟）。')">暂停刷新</button>
-          <button class="btn ghost" onclick="addLog('info','信号列表已导出（模拟）。')">导出 CSV</button>
-        </div>
-      </div>
-    </section>
-
-    <!-- ===== 视图：DTC ===== -->
-    <section class="view" id="view-dtc">
-      <div class="page-title">DTC 故障码</div>
-      <div class="page-desc">读取并管理电控单元存储的诊断故障码。</div>
-      <div class="card">
-        <table>
-          <thead><tr><th>DTC 码</th><th>故障描述</th><th>状态</th><th>优先级</th><th>发生次数</th></tr></thead>
-          <tbody>
-            <tr><td>P0117</td><td>冷却液温度传感器电路电压低</td><td><span class="tag err">当前故障</span></td><td>高</td><td>3</td></tr>
-            <tr><td>P0562</td><td>系统电压过低</td><td><span class="tag warn">历史故障</span></td><td>中</td><td>1</td></tr>
-            <tr><td>U0100</td><td>与 ECM 通信丢失</td><td><span class="tag info">已恢复</span></td><td>中</td><td>2</td></tr>
-          </tbody>
-        </table>
-        <div class="btn-row">
-          <button class="btn" onclick="addLog('info','已发送 ReadDTCInformation (0x19) 请求。')">读取 DTC</button>
-          <button class="btn danger" onclick="addLog('warn','已发送 ClearDiagnosticInformation (0x14)，清除全部 DTC（模拟）。')">清除 DTC</button>
-        </div>
-      </div>
-    </section>
-
-    <!-- ===== 视图：日志 ===== -->
-    <section class="view" id="view-log">
-      <div class="page-title">日志记录</div>
-      <div class="page-desc">工具运行过程中的诊断报文、链路事件与异常信息。</div>
-      <div class="card">
-        <div class="btn-row" style="margin-bottom:12px;margin-top:0;">
-          <select id="logLevel" style="width:140px;padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-size:13px;">
-            <option value="all">全部级别</option>
-            <option value="info">Info</option>
-            <option value="ok">Ok</option>
-            <option value="warn">Warn</option>
-            <option value="err">Error</option>
-          </select>
-          <button class="btn ghost" onclick="clearLog()">清空日志</button>
-          <button class="btn ghost" onclick="addLog('info','日志文件已导出至本地（模拟）。')">导出日志</button>
-        </div>
-        <div class="console" id="console"></div>
-      </div>
-    </section>
-
-    <!-- ===== 视图：设置 ===== -->
-    <section class="view" id="view-setting">
-      <div class="page-title">系统设置</div>
-      <div class="page-desc">工具通用参数、通信默认值与日志策略配置。</div>
-      <div class="grid">
-        <div class="card">
-          <h3>通信默认值</h3>
-          <div class="field"><label>默认波特率</label><select><option>500 kbps</option><option>250 kbps</option></select></div>
-          <div class="field"><label>默认请求 ID</label><input value="0x7E0"></div>
-          <div class="field"><label>P2 超时 (ms)</label><input value="1000"></div>
-          <div class="field"><label>P2* 扩展超时 (ms)</label><input value="5000"></div>
-        </div>
-        <div class="card">
-          <h3>偏好选项</h3>
-          <div class="field switch"><input type="checkbox" checked> <label style="margin:0">启动时自动连接上次通道</label></div>
-          <div class="field switch"><input type="checkbox" checked> <label style="margin:0">记录收发报文到日志文件</label></div>
-          <div class="field switch"><input type="checkbox"> <label style="margin:0">发送前弹出确认对话框</label></div>
-          <div class="field switch"><input type="checkbox" checked> <label style="margin:0">深色主题</label></div>
-          <div class="btn-row"><button class="btn" onclick="addLog('ok','设置已保存（模拟）。')">保存设置</button></div>
-        </div>
-      </div>
-    </section>
-  </main>
+    <div class="side-card">
+      <h3>📌 最近更新</h3>
+      <ul class="recent">
+        <li>秋天的第一顿早餐<small>2026-11-22</small></li>
+        <li>从零搭一个静态博客<small>2026-11-15</small></li>
+        <li>《原子习惯》读后<small>2026-11-08</small></li>
+        <li>我的工作台清单<small>2026-10-30</small></li>
+      </ul>
+    </div>
+  </aside>
 </div>
 
 <footer>
-  <span id="footLeft">就绪</span>
-  <span>统一服务工具 v1.0.0 · 构建 20261125</span>
+  <div class="social">
+    <a href="#" title="邮箱">✉️</a>
+    <a href="#" title="GitHub">🐙</a>
+    <a href="#" title="RSS">📡</a>
+  </div>
+  <div>© 2026 小丰收 · 记录点滴，静待收成</div>
 </footer>
 
-<script>
-/* ===== 导航切换 ===== */
-document.querySelectorAll('.nav-item').forEach(item=>{
-  item.addEventListener('click',()=>{
-    document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
-    document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
-    item.classList.add('active');
-    document.getElementById('view-'+item.dataset.view).classList.add('active');
-  });
-});
-
-/* ===== 日志 ===== */
-const consoleEl=document.getElementById('console');
-const logStore=[];
-function now(){return new Date().toLocaleTimeString('zh-CN',{hour12:false});}
-function addLog(level,msg){
-  logStore.push({level,msg,time:now()});
-  renderLog();
-}
-function renderLog(){
-  const lv=document.getElementById('logLevel').value;
-  consoleEl.innerHTML='';
-  logStore.filter(l=>lv==='all'||l.level===lv).forEach(l=>{
-    const div=document.createElement('div');
-    div.className='line';
-    div.innerHTML=`<span class="t">[${l.time}]</span> <span class="lv-${l.level}">[${l.level.toUpperCase()}]</span> ${l.msg}`;
-    consoleEl.appendChild(div);
-  });
-  consoleEl.scrollTop=consoleEl.scrollHeight;
-}
-function clearLog(){logStore.length=0;renderLog();addLog('info','日志已清空。');}
-document.getElementById('logLevel').addEventListener('change',renderLog);
-
-/* ===== 连接状态 ===== */
-let connected=false, frameCount=0, heartTimer=null;
-const btnConnect=document.getElementById('btnConnect'),
-      btnDisconnect=document.getElementById('btnDisconnect');
-
-btnConnect.addEventListener('click',()=>{
-  connected=true;frameCount=0;
-  document.getElementById('connDot').classList.add('on');
-  document.getElementById('connText').textContent='已连接';
-  document.getElementById('stConn').className='tag ok';
-  document.getElementById('stConn').textContent='已连接';
-  document.getElementById('stDev').textContent='USB-CAN Pro · SN 20481';
-  document.getElementById('stLoad').textContent='12.6 %';
-  document.getElementById('stHeart').textContent=now();
-  btnConnect.disabled=true;btnDisconnect.disabled=false;
-  document.getElementById('footLeft').textContent='链路已建立';
-  addLog('ok','CAN 通道已打开：'+document.getElementById('canChannel').selectedOptions[0].text+
-          ' @ '+document.getElementById('canBaud').value);
-  addLog('info','诊断寻址 Tx='+document.getElementById('txId').value+' Rx='+document.getElementById('rxId').value);
-  heartTimer=setInterval(()=>{
-    frameCount+=Math.floor(Math.random()*4)+1;
-    document.getElementById('stFrames').textContent=frameCount;
-    document.getElementById('stHeart').textContent=now();
-  },1000);
-});
-btnDisconnect.addEventListener('click',()=>{
-  connected=false;clearInterval(heartTimer);
-  document.getElementById('connDot').classList.remove('on');
-  document.getElementById('connText').textContent='未连接';
-  document.getElementById('stConn').className='tag info';
-  document.getElementById('stConn').textContent='未连接';
-  ['stDev','stLoad','stHeart'].forEach(id=>document.getElementById(id).textContent='—');
-  btnConnect.disabled=false;btnDisconnect.disabled=true;
-  document.getElementById('footLeft').textContent='就绪';
-  addLog('warn','CAN 通道已断开。');
-});
-
-/* ===== 诊断请求构造 ===== */
-function fillRequest(){
-  const sid=document.getElementById('sid').value;
-  const tpl={'10':'10 03','22':'22 F1 90','27':'27 01','31':'31 01 FF 00','3E':'3E 00'};
-  document.getElementById('reqHex').value=tpl[sid]||'';
-}
-document.getElementById('btnSend').addEventListener('click',()=>{
-  if(!connected){addLog('err','发送失败：通信链路未连接。');return;}
-  const hex=document.getElementById('reqHex').value.trim();
-  if(!hex){addLog('err','请求报文为空。');return;}
-  const t0=performance.now();
-  addLog('info','Tx → '+hex);
-  document.getElementById('respStatus').className='tag warn';
-  document.getElementById('respStatus').textContent='等待响应…';
-  setTimeout(()=>{
-    const sid=document.getElementById('sid').value;
-    const respMap={'10':'50 03 00 32 01 F4','22':'62 F1 90 32 30 32 36','27':'67 01 A8 5F 2C','31':'71 01 FF 00','3E':'7E 00'};
-    const resp=respMap[sid]||'7F '+sid+' 11';
-    const ms=(performance.now()-t0).toFixed(1);
-    document.getElementById('respHex').value=resp;
-    document.getElementById('respStatus').className='tag ok';
-    document.getElementById('respStatus').textContent='正响应';
-    document.getElementById('respSid').textContent='0x'+(parseInt(sid,16)+0x40).toString(16).toUpperCase();
-    document.getElementById('respTime').textContent=ms+' ms';
-    document.getElementById('respNrc').textContent='—';
-    addLog('ok','Rx ← '+resp+'  ('+ms+' ms)');
-  },300+Math.random()*300);
-});
-
-/* ===== 刷写流程（模拟） ===== */
-const btnFlash=document.getElementById('btnFlash'),
-      btnStop=document.getElementById('btnFlashStop');
-let flashTimer=null;
-function setStep(i,state){
-  const el=document.getElementById('step'+i);
-  el.classList.remove('active','done','fail');
-  if(state)el.classList.add(state);
-}
-btnFlash.addEventListener('click',()=>{
-  if(!connected){addLog('err','刷写失败：请先建立连接。');return;}
-  btnFlash.disabled=true;btnStop.disabled=false;
-  const stages=['SBL 连接中…','擦除 Flash 扇区…','下载固件数据…','校验完整性…','启动应用程序…'];
-  let i=0;
-  addLog('info','===== 开始固件刷写 =====');
-  flashTimer=setInterval(()=>{
-    if(i>0)setStep(i-1,'done');
-    if(i>=5){clearInterval(flashTimer);
-      document.getElementById('flashStage').textContent='刷写完成';
-      document.getElementById('flashProgress').textContent='100%';
-      btnFlash.disabled=false;btnStop.disabled=true;
-      addLog('ok','固件刷写成功，ECU 已跳转至应用程序。');return;}
-    setStep(i,'active');
-    document.getElementById('flashStage').textContent=stages[i];
-    if(i===2){document.getElementById('flashProgress').textContent='68%';document.getElementById('flashBlocks').textContent='128 / 188';}
-    if(i===3){document.getElementById('flashProgress').textContent='100%';document.getElementById('flashBlocks').textContent='188 / 188';}
-    addLog('info',stages[i]);
-    i++;
-  },900);
-});
-btnStop.addEventListener('click',()=>{
-  clearInterval(flashTimer);
-  setStep(2,'fail');
-  document.getElementById('flashStage').textContent='已中止';
-  btnFlash.disabled=false;btnStop.disabled=true;
-  addLog('err','刷写流程被人工中止。');
-});
-
-/* ===== 信号模拟刷新 ===== */
-setInterval(()=>{
-  if(!connected)return;
-  const rand=(min,max,d=0)=>+(min+Math.random()*(max-min)).toFixed(d);
-  document.getElementById('sig1').textContent=rand(700,1200,0);
-  document.getElementById('sig2').textContent=rand(30,60,0);
-  document.getElementById('sig3').textContent=rand(80,95,0);
-  document.getElementById('sig4').textContent=rand(12.0,12.8,1);
-  document.getElementById('sig5').textContent=rand(0,1.2,1);
-},1500);
-
-/* 初始化日志 */
-addLog('info','统一服务工具已启动，界面加载完成。');
-addLog('warn','当前为测试环境，所有报文与响应均为模拟数据。');
-</script>
 </body>
 </html>
