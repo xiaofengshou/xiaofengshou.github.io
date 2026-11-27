@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>3D 魔方小游戏 · 小丰收</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      font-family: "Microsoft YaHei", sans-serif;
+      background-color: #111;
+    }
+    #info {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      color: white;
+      background: rgba(0,0,0,0.6);
+      padding: 10px 20px;
+      border-radius: 30px;
+      font-size: 14px;
+      pointer-events: none;
+      z-index: 10;
+      backdrop-filter: blur(5px);
+    }
+    #controls {
+      position: absolute;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 12px;
+      background: rgba(30,30,30,0.8);
+      padding: 15px 25px;
+      border-radius: 60px;
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255,255,255,0.2);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.5);
+      z-index: 20;
+      flex-wrap: wrap;
+      justify-content: center;
+      max-width: 90vw;
+    }
+    .face-btn {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      border: none;
+      background: #2a2a2a;
+      color: white;
+      font-weight: bold;
+      font-size: 18px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 0 #0a0a0a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      user-select: none;
+    }
+    .face-btn:hover {
+      background: #3a3a3a;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 0 #0a0a0a;
+    }
+    .face-btn:active {
+      transform: translateY(2px);
+      box-shadow: 0 2px 0 #0a0a0a;
+    }
+    .face-btn.shift {
+      background: #4a6a8a;
+      box-shadow: 0 4px 0 #1a3a5a;
+    }
+    .face-btn.shift:hover {
+      background: #5a7a9a;
+    }
+    .face-btn.reset {
+      background: #8a4a4a;
+      box-shadow: 0 4px 0 #5a1a1a;
+    }
+    .face-btn.reset:hover {
+      background: #9a5a5a;
+    }
+    .face-btn.scramble {
+      background: #4a8a4a;
+      box-shadow: 0 4px 0 #1a5a1a;
+    }
+    .face-btn.scramble:hover {
+      background: #5a9a5a;
+    }
+    @media (max-width: 600px) {
+      .face-btn {
+        width: 40px;
+        height: 40px;
+        font-size: 16px;
+      }
+      #controls {
+        gap: 8px;
+        padding: 12px 18px;
+      }
+    }
+    .back-link {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      color: #fff;
+      background: rgba(0,0,0,0.5);
+      padding: 6px 16px;
+      border-radius: 20px;
+      text-decoration: none;
+      font-size: 14px;
+      z-index: 30;
+      backdrop-filter: blur(4px);
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+    .back-link:hover {
+      background: rgba(0,0,0,0.8);
+    }
+  </style>
+</head>
+<body>
+    <a class="back-link" href="../index.html">← 返回小丰收</a>
+    <div id="info">3D 魔方 | 鼠标拖拽旋转视角 | 点击按钮或按键盘 U/D/L/R/F/B 旋转对应面 (Shift + 按键反向)</div>
+    <div id="controls">
+        <button class="face-btn" data-face="U" title="上层顺时针 (U)">U</button>
+        <button class="face-btn" data-face="D" title="下层顺时针 (D)">D</button>
+        <button class="face-btn" data-face="L" title="左层顺时针 (L)">L</button>
+        <button class="face-btn" data-face="R" title="右层顺时针 (R)">R</button>
+        <button class="face-btn" data-face="F" title="前层顺时针 (F)">F</button>
+        <button class="face-btn" data-face="B" title="后层顺时针 (B)">B</button>
+        <button class="face-btn shift" id="shiftBtn" title="按住 Shift 再按字母键反向旋转">⇧ 反向</button>
+        <button class="face-btn scramble" id="scrambleBtn" title="随机打乱">打乱</button>
+        <button class="face-btn reset" id="resetBtn" title="恢复初始状态">重置</button>
+    </div>
+
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.128.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.128.0/examples/jsm/"
+            }
+        }
+    </script>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x111122);
+
+        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(4, 4, 6);
+        camera.lookAt(0, 0, 0);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        document.body.appendChild(renderer.domElement);
+
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+        controls.autoRotate = false;
+        controls.enableZoom = true;
+        controls.rotateSpeed = 1.0;
+        controls.target.set(0, 0, 0);
+
+        const ambientLight = new THREE.AmbientLight(0x404060);
+        scene.add(ambientLight);
+
+        const dirLight1 = new THREE.DirectionalLight(0xffffff, 1);
+        dirLight1.position.set(5, 10, 7);
+        scene.add(dirLight1);
+
+        const dirLight2 = new THREE.DirectionalLight(0xffeedd, 0.6);
+        dirLight2.position.set(-5, 3, -5);
+        scene.add(dirLight2);
+
+        const pointLight1 = new THREE.PointLight(0x4466ff, 0.5);
+        pointLight1.position.set(2, 2, 2);
+        scene.add(pointLight1);
+
+        const pointLight2 = new THREE.PointLight(0xff6644, 0.4);
+        pointLight2.position.set(-3, 1, 3);
+        scene.add(pointLight2);
+
+        const COLORS = {
+            U: 0xffffff,
+            D: 0xffdd00,
+            L: 0xff8c00,
+            R: 0xff0000,
+            F: 0x00cc00,
+            B: 0x0066ff
+        };
+
+        const CUBE_SIZE = 1;
+        const GAP = 0.06;
+        const OFFSET = CUBE_SIZE + GAP;
+
+        const cubes = [];
+        let isAnimating = false;
+        const animationQueue = [];
+
+        function getRotationParams(face, dir) {
+            const angle = dir * Math.PI / 2;
+            let axis, layerValue;
+            switch(face) {
+                case 'U': axis = 'y'; layerValue = 1; return { axis, layerValue, angle: -angle };
+                case 'D': axis = 'y'; layerValue = -1; return { axis, layerValue, angle: angle };
+                case 'L': axis = 'x'; layerValue = -1; return { axis, layerValue, angle: angle };
+                case 'R': axis = 'x'; layerValue = 1; return { axis, layerValue, angle: -angle };
+                case 'F': axis = 'z'; layerValue = 1; return { axis, layerValue, angle: -angle };
+                case 'B': axis = 'z'; layerValue = -1; return { axis, layerValue, angle: angle };
+            }
+        }
+
+        function createCube() {
+            cubes.forEach(item => scene.remove(item.mesh));
+            cubes.length = 0;
+
+            for (let x = -1; x <= 1; x++) {
+                for (let y = -1; y <= 1; y++) {
+                    for (let z = -1; z <= 1; z++) {
+                        const materials = [
+                            new THREE.MeshStandardMaterial({ color: x === 1 ? COLORS.R : 0x000000, roughness: 0.3, metalness: 0.1 }),
+                            new THREE.MeshStandardMaterial({ color: x === -1 ? COLORS.L : 0x000000, roughness: 0.3, metalness: 0.1 }),
+                            new THREE.MeshStandardMaterial({ color: y === 1 ? COLORS.U : 0x000000, roughness: 0.3, metalness: 0.1 }),
+                            new THREE.MeshStandardMaterial({ color: y === -1 ? COLORS.D : 0x000000, roughness: 0.3, metalness: 0.1 }),
+                            new THREE.MeshStandardMaterial({ color: z === 1 ? COLORS.F : 0x000000, roughness: 0.3, metalness: 0.1 }),
+                            new THREE.MeshStandardMaterial({ color: z === -1 ? COLORS.B : 0x000000, roughness: 0.3, metalness: 0.1 })
+                        ];
+
+                        const geometry = new THREE.BoxGeometry(CUBE_SIZE, CUBE_SIZE, CUBE_SIZE);
+                        const cube = new THREE.Mesh(geometry, materials);
+                        cube.castShadow = false;
+                        cube.receiveShadow = false;
+                        cube.position.set(x * OFFSET, y * OFFSET, z * OFFSET);
+
+                        const edges = new THREE.EdgesGeometry(geometry);
+                        const line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: 0x222222 }));
+                        cube.add(line);
+
+                        cube.userData = { x, y, z };
+                        scene.add(cube);
+                        cubes.push({
+                            mesh: cube,
+                            logicPos: new THREE.Vector3(x, y, z)
+                        });
+                    }
+                }
+            }
+        }
+
+        createCube();
+
+        function rotateFace(face, dir = 1, animate = true) {
+            if (isAnimating) {
+                animationQueue.push({ face, dir });
+                return;
+            }
+
+            const params = getRotationParams(face, dir);
+            if (!params) return;
+
+            const { axis, layerValue, angle } = params;
+
+            const affectedCubes = [];
+            cubes.forEach(item => {
+                const pos = item.logicPos;
+                if (Math.abs(pos[axis] - layerValue) < 0.1) {
+                    affectedCubes.push(item);
+                }
+            });
+
+            if (affectedCubes.length === 0) return;
+
+            isAnimating = true;
+
+            const rotationMatrix = new THREE.Matrix4().makeRotationAxis(
+                new THREE.Vector3(axis === 'x' ? 1 : 0, axis === 'y' ? 1 : 0, axis === 'z' ? 1 : 0),
+                angle
+            );
+
+            const startTime = performance.now();
+            const duration = 250;
+            const startPositions = affectedCubes.map(item => item.mesh.position.clone());
+            const startQuaternions = affectedCubes.map(item => item.mesh.quaternion.clone());
+
+            function animateRotation() {
+                const now = performance.now();
+                const progress = Math.min((now - startTime) / duration, 1);
+                const easeProgress = 1 - Math.pow(1 - progress, 3);
+                const currentAngle = angle * easeProgress;
+                const currentMatrix = new THREE.Matrix4().makeRotationAxis(
+                    new THREE.Vector3(axis === 'x' ? 1 : 0, axis === 'y' ? 1 : 0, axis === 'z' ? 1 : 0),
+                    currentAngle
+                );
+
+                affectedCubes.forEach((item, index) => {
+                    const mesh = item.mesh;
+                    const pos = startPositions[index].clone();
+                    pos.applyMatrix4(currentMatrix);
+                    mesh.position.copy(pos);
+
+                    const rotQuat = new THREE.Quaternion().setFromAxisAngle(
+                        new THREE.Vector3(axis === 'x' ? 1 : 0, axis === 'y' ? 1 : 0, axis === 'z' ? 1 : 0),
+                        currentAngle
+                    );
+                    mesh.quaternion.copy(rotQuat).multiply(startQuaternions[index]);
+                });
+
+                if (progress < 1) {
+                    requestAnimationFrame(animateRotation);
+                } else {
+                    affectedCubes.forEach((item, index) => {
+                        const finalPos = startPositions[index].clone();
+                        finalPos.applyMatrix4(rotationMatrix);
+                        item.mesh.position.copy(finalPos);
+
+                        const rotQuat = new THREE.Quaternion().setFromAxisAngle(
+                            new THREE.Vector3(axis === 'x' ? 1 : 0, axis === 'y' ? 1 : 0, axis === 'z' ? 1 : 0),
+                            angle
+                        );
+                        item.mesh.quaternion.copy(rotQuat).multiply(startQuaternions[index]);
+
+                        const lp = item.logicPos;
+                        const newPos = new THREE.Vector3(lp.x, lp.y, lp.z).applyMatrix4(rotationMatrix);
+                        lp.x = Math.round(newPos.x);
+                        lp.y = Math.round(newPos.y);
+                        lp.z = Math.round(newPos.z);
+                    });
+
+                    isAnimating = false;
+
+                    if (animationQueue.length > 0) {
+                        const next = animationQueue.shift();
+                        rotateFace(next.face, next.dir, true);
+                    }
+                }
+            }
+
+            requestAnimationFrame(animateRotation);
+        }
+
+        function scramble() {
+            animationQueue.length = 0;
+            if (isAnimating) return;
+            const faces = ['U', 'D', 'L', 'R', 'F', 'B'];
+            for (let i = 0; i < 20; i++) {
+                const face = faces[Math.floor(Math.random() * faces.length)];
+                const dir = Math.random() > 0.5 ? 1 : -1;
+                rotateFace(face, dir, true);
+            }
+        }
+
+        function resetCube() {
+            animationQueue.length = 0;
+            if (isAnimating) return;
+            cubes.forEach(item => scene.remove(item.mesh));
+            cubes.length = 0;
+            createCube();
+        }
+
+        window.addEventListener('keydown', (e) => {
+            const key = e.key.toUpperCase();
+            if (['U', 'D', 'L', 'R', 'F', 'B'].includes(key)) {
+                e.preventDefault();
+                const dir = e.shiftKey ? -1 : 1;
+                rotateFace(key, dir, true);
+            }
+        });
+
+        document.querySelectorAll('.face-btn[data-face]').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const face = e.target.dataset.face;
+                const dir = e.shiftKey ? -1 : 1;
+                rotateFace(face, dir, true);
+            });
+        });
+
+        document.getElementById('scrambleBtn').addEventListener('click', () => scramble());
+        document.getElementById('resetBtn').addEventListener('click', () => resetCube());
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            renderer.render(scene, camera);
+        }
+
+        animate();
+        camera.position.set(5, 4, 7);
+        controls.update();
+    </script>
+</body>
+</html>

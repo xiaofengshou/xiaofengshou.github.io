@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>超级玛丽 · 小丰收</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #1a1a2a;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      font-family: "Microsoft YaHei", monospace;
+      overflow: hidden;
+    }
+    .game-wrapper {
+      position: relative;
+      background: #2a2a3a;
+      border-radius: 16px;
+      padding: 16px;
+      box-shadow: 0 0 40px rgba(0, 0, 0, 0.8);
+    }
+    canvas {
+      display: block;
+      margin: 0 auto;
+      border-radius: 8px;
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+      background: #5c94fc;
+    }
+    .back-link {
+      position: absolute;
+      top: -44px;
+      right: 0;
+      color: #fff;
+      background: rgba(255, 255, 255, 0.1);
+      padding: 6px 16px;
+      border-radius: 20px;
+      text-decoration: none;
+      font-size: 14px;
+      backdrop-filter: blur(4px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+    .back-link:hover { background: rgba(255, 255, 255, 0.2); }
+    .controls-hint {
+      text-align: center;
+      color: #aaa;
+      margin-top: 12px;
+      font-size: 14px;
+      letter-spacing: 1px;
+    }
+    .controls-hint kbd {
+      background: #444;
+      padding: 2px 8px;
+      border-radius: 4px;
+      color: #eee;
+      font-family: monospace;
+    }
+  </style>
+</head>
+<body>
+  <div class="game-wrapper">
+    <a class="back-link" href="../index.html">← 返回小丰收</a>
+    <canvas id="gameCanvas" width="800" height="400"></canvas>
+    <div class="controls-hint">
+      <kbd>←</kbd> <kbd>→</kbd> 移动 &nbsp;|&nbsp; <kbd>↑</kbd> 跳跃 &nbsp;|&nbsp; <kbd>R</kbd> 重新开始
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      const canvas = document.getElementById('gameCanvas');
+      const ctx = canvas.getContext('2d');
+      const W = canvas.width;
+      const H = canvas.height;
+
+      const TILE = 32;
+      const GRAVITY = 0.5;
+      const JUMP_FORCE = -9;
+      const MOVE_SPEED = 4;
+
+      let gameState = 'playing';
+      let keys = { left: false, right: false, up: false };
+
+      const player = {
+        x: 100, y: 200, w: 24, h: 32,
+        vx: 0, vy: 0, onGround: false, facing: 1, alive: true
+      };
+
+      let platforms = [], bricks = [], enemies = [], coins = [], flag = null;
+      let cameraX = 0;
+
+      function initLevel() {
+        gameState = 'playing';
+        player.x = 80; player.y = 240;
+        player.vx = 0; player.vy = 0;
+        player.alive = true; player.facing = 1;
+
+        platforms = []; bricks = []; enemies = []; coins = [];
+        cameraX = 0;
+
+        for (let i = 0; i < 40; i++) {
+          if (i === 14 || i === 15 || i === 16) continue;
+          platforms.push({ x: i * TILE, y: H - TILE, w: TILE, h: TILE });
+        }
+
+        platforms.push({ x: 200, y: H - TILE * 2, w: TILE * 2, h: TILE });
+        platforms.push({ x: 264, y: H - TILE * 3, w: TILE * 2, h: TILE });
+
+        bricks.push({ x: 200, y: H - TILE * 3, w: TILE, h: TILE, used: false });
+        bricks.push({ x: 264, y: H - TILE * 4, w: TILE, h: TILE, used: false });
+
+        platforms.push({ x: 420, y: H - TILE * 2, w: TILE * 3, h: TILE });
+        platforms.push({ x: 520, y: H - TILE * 3, w: TILE * 2, h: TILE });
+
+        for (let r = 0; r < 3; r++) {
+          for (let c = 0; c < 2; c++) {
+            platforms.push({ x: 650 + c * TILE, y: H - TILE * (2 + r), w: TILE, h: TILE });
+          }
+        }
+
+        platforms.push({ x: 780, y: H - TILE * 2, w: TILE * 2, h: TILE });
+        platforms.push({ x: 844, y: H - TILE * 3, w: TILE * 2, h: TILE });
+        platforms.push({ x: 908, y: H - TILE * 4, w: TILE * 2, h: TILE });
+
+        for (let i = 0; i < 5; i++) {
+          coins.push({ x: 300 + i * 36, y: H - TILE * 3 - 20, w: 16, h: 16, collected: false });
+        }
+        for (let i = 0; i < 3; i++) {
+          coins.push({ x: 440 + i * 36, y: H - TILE * 3 - 20, w: 16, h: 16, collected: false });
+        }
+
+        enemies.push({ x: 360, y: H - TILE - 24, w: 24, h: 24, vx: -1.5, minX: 320, maxX: 420, alive: true });
+        enemies.push({ x: 600, y: H - TILE - 24, w: 24, h: 24, vx: 1.8, minX: 560, maxX: 700, alive: true });
+
+        flag = { x: 1000, y: H - TILE * 5, w: 8, h: TILE * 4 };
+      }
+
+      initLevel();
+
+      window.addEventListener('keydown', (e) => {
+        const k = e.key;
+        if (k === 'ArrowLeft' || k === 'a' || k === 'A') { keys.left = true; e.preventDefault(); }
+        if (k === 'ArrowRight' || k === 'd' || k === 'D') { keys.right = true; e.preventDefault(); }
+        if (k === 'ArrowUp' || k === 'w' || k === 'W' || k === ' ') { keys.up = true; e.preventDefault(); }
+        if (k === 'r' || k === 'R') { initLevel(); e.preventDefault(); }
+      });
+      window.addEventListener('keyup', (e) => {
+        const k = e.key;
+        if (k === 'ArrowLeft' || k === 'a' || k === 'A') { keys.left = false; e.preventDefault(); }
+        if (k === 'ArrowRight' || k === 'd' || k === 'D') { keys.right = false; e.preventDefault(); }
+        if (k === 'ArrowUp' || k === 'w' || k === 'W' || k === ' ') { keys.up = false; e.preventDefault(); }
+      });
+
+      function rectCollide(a, b) {
+        return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
+      }
+
+      function update() {
+        if (gameState !== 'playing') return;
+
+        if (keys.left) { player.vx = -MOVE_SPEED; player.facing = -1; }
+        else if (keys.right) { player.vx = MOVE_SPEED; player.facing = 1; }
+        else { player.vx = 0; }
+
+        if (keys.up && player.onGround) {
+          player.vy = JUMP_FORCE;
+          player.onGround = false;
+          keys.up = false;
+        }
+
+        player.vy += GRAVITY;
+
+        player.x += player.vx;
+        if (player.x < 0) player.x = 0;
+        if (player.x + player.w > 2000) player.x = 2000 - player.w;
+
+        for (let p of platforms) {
+          if (rectCollide(player, p)) {
+            if (player.vx > 0) player.x = p.x - player.w;
+            else if (player.vx < 0) player.x = p.x + p.w;
+          }
+        }
+
+        player.y += player.vy;
+        player.onGround = false;
+
+        for (let p of platforms) {
+          if (rectCollide(player, p)) {
+            if (player.vy > 0) {
+              player.y = p.y - player.h;
+              player.vy = 0;
+              player.onGround = true;
+            } else if (player.vy < 0) {
+              player.y = p.y + p.h;
+              player.vy = 0;
+            }
+          }
+        }
+
+        for (let b of bricks) {
+          if (rectCollide(player, b)) {
+            if (player.vy < 0 && player.y > b.y + b.h - 10) {
+              b.used = true;
+              player.y = b.y + b.h;
+              player.vy = 1;
+            } else if (player.vy > 0) {
+              player.y = b.y - player.h;
+              player.vy = 0;
+              player.onGround = true;
+            }
+          }
+        }
+
+        if (player.y > H + 100) { gameState = 'gameover'; player.alive = false; return; }
+
+        for (let e of enemies) {
+          if (!e.alive) continue;
+          e.x += e.vx;
+          if (e.x < e.minX) { e.x = e.minX; e.vx *= -1; }
+          if (e.x + e.w > e.maxX) { e.x = e.maxX - e.w; e.vx *= -1; }
+
+          if (rectCollide(player, e)) {
+            if (player.vy > 0 && player.y + player.h - player.vy <= e.y + 8) {
+              e.alive = false;
+              player.vy = JUMP_FORCE * 0.6;
+            } else {
+              gameState = 'gameover';
+              return;
+            }
+          }
+        }
+
+        for (let c of coins) {
+          if (c.collected) continue;
+          if (rectCollide(player, c)) c.collected = true;
+        }
+
+        if (flag && rectCollide(player, flag)) gameState = 'win';
+
+        const targetCamX = player.x - W * 0.35;
+        cameraX += (targetCamX - cameraX) * 0.1;
+        if (cameraX < 0) cameraX = 0;
+        if (cameraX > 1400) cameraX = 1400;
+      }
+
+      function draw() {
+        ctx.clearRect(0, 0, W, H);
+
+        const skyGrad = ctx.createLinearGradient(0, 0, 0, H);
+        skyGrad.addColorStop(0, '#5c94fc');
+        skyGrad.addColorStop(0.7, '#8cb8fc');
+        skyGrad.addColorStop(1, '#c8dcfc');
+        ctx.fillStyle = skyGrad;
+        ctx.fillRect(0, 0, W, H);
+
+        ctx.fillStyle = 'rgba(255,255,255,0.6)';
+        drawCloud(120 - cameraX * 0.2, 60, 60);
+        drawCloud(400 - cameraX * 0.2, 90, 80);
+        drawCloud(750 - cameraX * 0.2, 50, 50);
+
+        ctx.save();
+        ctx.translate(-cameraX, 0);
+
+        for (let p of platforms) {
+          if (p.x + p.w < cameraX - 50 || p.x > cameraX + W + 50) continue;
+          ctx.fillStyle = '#c84c0c';
+          ctx.fillRect(p.x, p.y, p.w, p.h);
+          ctx.fillStyle = '#e86c2c';
+          ctx.fillRect(p.x, p.y, p.w, 4);
+          ctx.fillStyle = '#a83c0c';
+          for (let i = 0; i < p.w; i += 16) {
+            ctx.fillRect(p.x + i, p.y + 8, 8, 8);
+          }
+        }
+
+        for (let b of bricks) {
+          if (b.x + b.w < cameraX - 50 || b.x > cameraX + W + 50) continue;
+          if (b.used) {
+            ctx.fillStyle = '#8a6a4a';
+            ctx.fillRect(b.x, b.y, b.w, b.h);
+            ctx.fillStyle = '#6a4a2a';
+            ctx.fillRect(b.x + 4, b.y + 4, b.w - 8, b.h - 8);
+          } else {
+            ctx.fillStyle = '#e8a838';
+            ctx.fillRect(b.x, b.y, b.w, b.h);
+            ctx.fillStyle = '#f8c858';
+            ctx.fillRect(b.x + 4, b.y + 4, b.w - 8, b.h - 8);
+            ctx.fillStyle = '#8a4a0a';
+            ctx.font = 'bold 20px monospace';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('?', b.x + b.w / 2, b.y + b.h / 2 + 2);
+          }
+        }
+
+        for (let c of coins) {
+          if (c.collected) continue;
+          if (c.x + c.w < cameraX - 50 || c.x > cameraX + W + 50) continue;
+          ctx.fillStyle = '#fcd800';
+          ctx.beginPath();
+          ctx.arc(c.x + c.w / 2, c.y + c.h / 2, c.w / 2, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillStyle = '#f8a800';
+          ctx.beginPath();
+          ctx.arc(c.x + c.w / 2, c.y + c.h / 2, c.w / 3, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        for (let e of enemies) {
+          if (!e.alive) continue;
+          if (e.x + e.w < cameraX - 50 || e.x > cameraX + W + 50) continue;
+          ctx.fillStyle = '#d84c1c';
+          ctx.beginPath();
+          ctx.ellipse(e.x + e.w / 2, e.y + e.h / 2, e.w / 2, e.h / 2, 0, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillStyle = '#fff';
+          ctx.beginPath();
+          ctx.arc(e.x + 8, e.y + 8, 4, 0, Math.PI * 2);
+          ctx.arc(e.x + 16, e.y + 8, 4, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillStyle = '#000';
+          ctx.beginPath();
+          ctx.arc(e.x + 9, e.y + 8, 2, 0, Math.PI * 2);
+          ctx.arc(e.x + 17, e.y + 8, 2, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        if (flag) {
+          if (flag.x + 50 > cameraX && flag.x < cameraX + W + 50) {
+            ctx.fillStyle = '#888';
+            ctx.fillRect(flag.x, flag.y, flag.w, flag.h);
+            ctx.fillStyle = '#2a8a2a';
+            ctx.beginPath();
+            ctx.moveTo(flag.x + flag.w, flag.y);
+            ctx.lineTo(flag.x + flag.w + 30, flag.y + 15);
+            ctx.lineTo(flag.x + flag.w, flag.y + 30);
+            ctx.fill();
+          }
+        }
+
+        if (player.alive) {
+          ctx.save();
+          ctx.translate(player.x + player.w / 2, player.y + player.h / 2);
+          if (player.facing === -1) ctx.scale(-1, 1);
+          ctx.fillStyle = '#d82c1c';
+          ctx.fillRect(-12, -16, 24, 8);
+          ctx.fillRect(-14, -10, 28, 4);
+          ctx.fillStyle = '#fcd8a8';
+          ctx.fillRect(-10, -8, 20, 12);
+          ctx.fillStyle = '#000';
+          ctx.fillRect(2, -6, 4, 4);
+          ctx.fillStyle = '#6a3a1a';
+          ctx.fillRect(4, 0, 10, 4);
+          ctx.fillStyle = '#2c5cd8';
+          ctx.fillRect(-10, 4, 20, 10);
+          ctx.fillStyle = '#fcd800';
+          ctx.fillRect(-4, 6, 4, 4);
+          ctx.fillRect(2, 6, 4, 4);
+          ctx.fillStyle = '#2c3a8a';
+          ctx.fillRect(-8, 14, 8, 6);
+          ctx.fillRect(2, 14, 8, 6);
+          ctx.restore();
+        }
+
+        ctx.restore();
+
+        if (gameState === 'win') {
+          ctx.fillStyle = 'rgba(0,0,0,0.6)';
+          ctx.fillRect(0, 0, W, H);
+          ctx.fillStyle = '#fcd800';
+          ctx.font = 'bold 48px "Microsoft YaHei", monospace';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText('🎉 胜利！', W / 2, H / 2 - 20);
+          ctx.fillStyle = '#fff';
+          ctx.font = '24px "Microsoft YaHei", monospace';
+          ctx.fillText('按 R 重新开始', W / 2, H / 2 + 50);
+        } else if (gameState === 'gameover') {
+          ctx.fillStyle = 'rgba(0,0,0,0.6)';
+          ctx.fillRect(0, 0, W, H);
+          ctx.fillStyle = '#ff6b6b';
+          ctx.font = 'bold 48px "Microsoft YaHei", monospace';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText('💀 游戏结束', W / 2, H / 2 - 20);
+          ctx.fillStyle = '#fff';
+          ctx.font = '24px "Microsoft YaHei", monospace';
+          ctx.fillText('按 R 重新开始', W / 2, H / 2 + 50);
+        }
+
+        const collectedCount = coins.filter(c => c.collected).length;
+        const totalCoins = coins.length;
+        ctx.fillStyle = 'rgba(0,0,0,0.4)';
+        ctx.fillRect(W - 180, 20, 160, 40);
+        ctx.fillStyle = '#fcd800';
+        ctx.font = 'bold 20px monospace';
+        ctx.textAlign = 'right';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(`🪙 ${collectedCount} / ${totalCoins}`, W - 30, 42);
+      }
+
+      function drawCloud(x, y, size) {
+        ctx.beginPath();
+        ctx.arc(x, y, size * 0.5, 0, Math.PI * 2);
+        ctx.arc(x + size * 0.5, y - size * 0.2, size * 0.4, 0, Math.PI * 2);
+        ctx.arc(x - size * 0.5, y - size * 0.1, size * 0.4, 0, Math.PI * 2);
+        ctx.arc(x + size * 0.2, y + size * 0.1, size * 0.45, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      function gameLoop() {
+        update();
+        draw();
+        requestAnimationFrame(gameLoop);
+      }
+
+      gameLoop();
+    })();
+  </script>
+</body>
+</html>
