@@ -7,18 +7,106 @@
   <meta name="description" content="小丰收——草木、水与指尖的日常记录。绿植养护、养鱼水质、吉他练习，一点一滴装进人生的粮仓。">
   <meta name="author" content="小丰收">
   <link rel="stylesheet" href="./assets/css/style.css">
+  <!-- 小游戏卡片样式（内联，确保即使 style.css 未更新也能正常显示） -->
+  <style>
+    .games-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 20px;
+      margin-top: 12px;
+    }
+    .game-card {
+      display: flex;
+      flex-direction: column;
+      background: #fffdf8;
+      border-radius: 20px;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+      overflow: hidden;
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+      text-decoration: none;
+      color: inherit;
+      border: 1px solid rgba(180, 150, 120, 0.15);
+    }
+    .game-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 14px 28px rgba(0, 0, 0, 0.1);
+    }
+    .game-card-cover {
+      height: 140px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 64px;
+      background: linear-gradient(145deg, #e8f0e0, #d4e0c8);
+      color: #4a6a3a;
+    }
+    .game-card-cover.rubik {
+      background: linear-gradient(145deg, #2a2a3a, #1a1a2a);
+      color: #fff;
+      font-size: 72px;
+      letter-spacing: 8px;
+      text-shadow: 0 0 20px rgba(100, 200, 255, 0.5);
+    }
+    .game-card-cover.mario {
+      background: linear-gradient(145deg, #e8d8b0, #c8b080);
+      color: #8a3a1a;
+    }
+    .game-card-body {
+      padding: 16px 18px 18px;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+    }
+    .game-card-title {
+      font-size: 20px;
+      font-weight: 600;
+      margin: 0 0 6px;
+      color: #3a2e22;
+    }
+    .game-card-desc {
+      font-size: 14px;
+      color: #7a6a5a;
+      line-height: 1.5;
+      margin: 0 0 14px;
+      flex: 1;
+    }
+    .game-card-foot {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+      color: #b09a84;
+      border-top: 1px solid #ede5db;
+      padding-top: 12px;
+    }
+    .game-card-arrow {
+      color: #c7a87a;
+      font-weight: 600;
+    }
+    /* 小游戏导航按钮高亮（如果 header 里有对应链接） */
+    body[data-nav="games"] .nav-games {
+      color: #d4a373 !important;
+      font-weight: 700;
+      border-bottom: 2px solid #d4a373;
+      padding-bottom: 4px;
+    }
+  </style>
 </head>
 
+<!-- data-nav 决定导航栏哪个栏目高亮：home -->
 <body data-nav="home">
 
+  <!-- 导航栏：由 common.js 用 fetch 引入 header.html -->
   <div id="site-header"></div>
 
   <main>
 
+    <!-- ==================== 站点头图 ==================== -->
     <section class="hero">
       <p class="eyebrow">PLANTS · WATER · FINGERS</p>
       <h1>小丰收</h1>
       <p class="slogan">所有微小而确定的小丰收，都值得装进人生的粮仓！</p>
+
       <div class="hero-stickers">
         <span>草木</span>
         <span>水</span>
@@ -26,6 +114,7 @@
       </div>
     </section>
 
+    <!-- ==================== 三个栏目入口卡片 ==================== -->
     <section class="section">
       <div class="section-head">
         <h2 class="section-title">三个小栏目</h2>
@@ -33,35 +122,88 @@
       </div>
 
       <div class="cards">
+
         <a class="card is-plants" href="./plants.html">
           <span class="card-tag">草木</span>
           <h3 class="card-title">草木生欢喜</h3>
           <p class="card-sub">水培 · 水位 · 光照</p>
           <p class="card-desc">合果芋、小仙女、山乌龟，还有厨房里的大蒜和一瓶绿萝——五个水培瓶的日常。</p>
-          <div class="card-foot"><span>共 1 篇</span><span class="card-arrow">进入 →</span></div>
+          <div class="card-foot">
+            <span>共 1 篇</span>
+            <span class="card-arrow">进入 →</span>
+          </div>
         </a>
+
         <a class="card is-fish" href="./fish.html">
           <span class="card-tag">水</span>
           <h3 class="card-title">水中小世界</h3>
           <p class="card-sub">古法缸 · 水质 · 水草</p>
           <p class="card-desc">斑马鱼和观背青鳉，一缸不用电的古法缸，后景高珍珠，中景火焰红丁香。</p>
-          <div class="card-foot"><span>共 1 篇</span><span class="card-arrow">进入 →</span></div>
+          <div class="card-foot">
+            <span>共 1 篇</span>
+            <span class="card-arrow">进入 →</span>
+          </div>
         </a>
+
         <a class="card is-guitar" href="./guitar.html">
           <span class="card-tag">指尖</span>
           <h3 class="card-title">指尖流水</h3>
           <p class="card-sub">前奏 · 弹唱 · 乐理</p>
           <p class="card-desc">练前奏、练弹唱、补基础乐理。手指的记忆，是一点一点长出来的。</p>
-          <div class="card-foot"><span>共 1 篇</span><span class="card-arrow">进入 →</span></div>
+          <div class="card-foot">
+            <span>共 1 篇</span>
+            <span class="card-arrow">进入 →</span>
+          </div>
         </a>
+
       </div>
     </section>
 
+    <!-- ==================== 小游戏入口（新增） ==================== -->
+    <section class="section" id="games-section">
+      <div class="section-head">
+        <h2 class="section-title">小游戏</h2>
+        <span class="section-more">指尖的小乐趣</span>
+      </div>
+
+      <div class="games-grid">
+
+        <!-- 魔方 -->
+        <a class="game-card" href="./games/魔方.html">
+          <div class="game-card-cover rubik">🎲</div>
+          <div class="game-card-body">
+            <h3 class="game-card-title">3D 魔方</h3>
+            <p class="game-card-desc">鼠标拖拽旋转视角，点击按钮或键盘 U/D/L/R/F/B 旋转对应面，挑战还原六面色彩。</p>
+            <div class="game-card-foot">
+              <span>🎮 益智</span>
+              <span class="game-card-arrow">开始 →</span>
+            </div>
+          </div>
+        </a>
+
+        <!-- 超级玛丽 -->
+        <a class="game-card" href="./games/超级玛丽.html">
+          <div class="game-card-cover mario">🍄</div>
+          <div class="game-card-body">
+            <h3 class="game-card-title">超级玛丽</h3>
+            <p class="game-card-desc">经典像素冒险，顶砖块、吃蘑菇、踩敌人，用键盘左右键和上键闯过小关卡。</p>
+            <div class="game-card-foot">
+              <span>🏃 动作</span>
+              <span class="game-card-arrow">开始 →</span>
+            </div>
+          </div>
+        </a>
+
+      </div>
+    </section>
+
+    <!-- ==================== 最新文章列表 ==================== -->
     <section class="section">
       <div class="section-head">
         <h2 class="section-title">最新记录</h2>
         <span class="section-more">最近写下的几页</span>
       </div>
+
       <ul class="post-list">
         <li>
           <span class="post-date">2026-11-22</span>
