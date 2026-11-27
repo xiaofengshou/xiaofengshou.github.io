@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>俄罗斯方块 · 小丰收</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:#1a1a2a; display:flex; justify-content:center; align-items:center; min-height:100vh; font-family:"Microsoft YaHei",monospace; overflow:hidden; }
+  .game-wrapper { position:relative; background:#2a2a3a; border-radius:16px; padding:16px; box-shadow:0 0 40px rgba(0,0,0,.8); }
+  canvas { display:block; margin:0 auto; border-radius:8px; image-rendering:pixelated; background:#0a0a14; }
+  .back-link { position:absolute; top:-44px; right:0; color:#fff; background:rgba(255,255,255,.1); padding:6px 16px; border-radius:20px; text-decoration:none; font-size:14px; border:1px solid rgba(255,255,255,.15); }
+  .back-link:hover { background:rgba(255,255,255,.2); }
+  .controls-hint { text-align:center; color:#aaa; margin-top:12px; font-size:14px; letter-spacing:1px; }
+  .controls-hint kbd { background:#444; padding:2px 8px; border-radius:4px; color:#eee; font-family:monospace; }
+</style>
+</head>
+<body>
+<div class="game-wrapper">
+  <a class="back-link" href="../index.html">← 返回小丰收</a>
+  <canvas id="gameCanvas" width="400" height="600"></canvas>
+  <div class="controls-hint">
+    <kbd>←</kbd><kbd>→</kbd> 移动 &nbsp;|&nbsp; <kbd>↑</kbd> 旋转 &nbsp;|&nbsp; <kbd>↓</kbd> 加速 &nbsp;|&nbsp; <kbd>空格</kbd> 硬降 &nbsp;|&nbsp; <kbd>R</kbd> 重开
+  </div>
+</div>
+<script>
+(function(){
+  const canvas = document.getElementById('gameCanvas');
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  const COLS = 10, ROWS = 20;
+  const TILE = 28;
+  const OFFSET_X = (W - COLS*TILE)/2;
+  const OFFSET_Y = 20;
+
+  const COLORS = {
+    I: '#00e0e0', O: '#f0d000', T: '#c060e0',
+    S: '#40e040', Z: '#e04040', J: '#4060e0', L: '#e09040'
+  };
+  const SHAPES = {
+    I: [[1,1,1,1]],
+    O: [[1,1],[1,1]],
+    T: [[0,1,0],[1,1,1]],
+    S: [[0,1,1],[1,1,0]],
+    Z: [[1,1,0],[0,1,1]],
+    J: [[1,0,0],[1,1,1]],
+    L: [[0,0,1],[1,1,1]]
+  };
+
+  let board, current, next, score, lines, level, dropTimer, dropInterval, gameState, keys;
+
+  function initLevel(){
+    board = Array.from({length:ROWS}, () => Array(COLS).fill(null));
+    score = 0; lines = 0; level = 1;
+    dropTimer = 0;
+    dropInterval = 800;
+    gameState = 'playing';
+    keys = {};
+    current = null;
+    next = randomPiece();
+    spawnPiece();
+  }
+
+  function randomPiece(){
+    const keys = Object.keys(SHAPES);
+    const k = keys[Math.floor(Math.random()*keys.length)];
+    return { type: k, shape: SHAPES[k].map(r => [...r]), x: Math.floor((COLS - SHAPES[k][0].length)/2), y: 0 };
+  }
+
+  function spawnPiece(){
+    current = next || randomPiece();
+    next = randomPiece();
+    current.x = Math.floor((COLS - current.shape[0].length)/2);
+    current.y = 0;
+    if (!canPlace(current.x, current.y, current.shape)){
+      gameState = 'gameover';
+    }
+  }
+
+  function canPlace(px, py, shape){
+    for (let r=0; r<shape.length; r++){
+      for (let c=0; c<shape[r].length; c++){
+        if (!shape[r][c]) continue;
+        const x = px + c, y = py + r;
+        if (x < 0 || x >= COLS || y >= ROWS) return false;
+        if (y >= 0 && board[y][x]) return false;
+      }
+    }
+    return true;
+  }
+
+  function rotate(shape){
+    const rows = shape.length, cols = shape[0].length;
+    const result = Array.from({length:cols}, () => Array(rows).fill(0));
+    for (let r=0; r<rows; r++)
+      for (let c=0; c<cols; c++)
+        result[c][rows-1-r] = shape[r][c];
+    return result;
+  }
+
+  function lockPiece(){
+    current.shape.forEach((row, r) => {
+      row.forEach((v, c) => {
+        if (v){
+          const y = current.y + r, x = current.x + c;
+          if (y >= 0) board[y][x] = current.type;
+        }
+      });
+    });
+    clearLines();
+    spawnPiece();
+  }
+
+  function clearLines(){
+    let cleared = 0;
+    for (let r = ROWS-1; r >= 0; r--){
+      if (board[r].every(v => v)){
+        board.splice(r, 1);
+        board.unshift(Array(COLS).fill(null));
+        cleared++;
+        r++;
+      }
+    }
+    if (cleared > 0){
+      const pts = [0, 100, 300, 500, 800][cleared] || 800;
+      score += pts * level;
+      lines += cleared;
+      level = Math.floor(lines / 10) + 1;
+      dropInterval = Math.max(100, 800 - (level-1)*70);
+    }
+  }
+
+  function move(dx, dy){
+    if (canPlace(current.x + dx, current.y + dy, current.shape)){
+      current.x += dx;
+      current.y += dy;
+      return true;
+    }
+    return false;
+  }
+
+  function hardDrop(){
+    while (move(0, 1)) {}
+    lockPiece();
+  }
+
+  function tryRotate(){
+    const rotated = rotate(current.shape);
+    const kicks = [0, -1, 1, -2, 2];
+    for (let k of kicks){
+      if (canPlace(current.x + k, current.y, rotated)){
+        current.shape = rotated;
+        current.x += k;
+        return;
+      }
+    }
+  }
+
+  function update(dt){
+    if (gameState !== 'playing' || !current) return;
+    dropTimer += dt;
+    if (dropTimer >= dropInterval){
+      dropTimer = 0;
+      if (!move(0, 1)) lockPiece();
+    }
+  }
+
+  function drawBlock(x, y, color, alpha){
+    ctx.globalAlpha = alpha || 1;
+    ctx.fillStyle = color;
+    ctx.fillRect(x, y, TILE-2, TILE-2);
+    ctx.fillStyle = 'rgba(255,255,255,.3)';
+    ctx.fillRect(x, y, TILE-2, 4);
+    ctx.fillRect(x, y, 4, TILE-2);
+    ctx.fillStyle = 'rgba(0,0,0,.25)';
+    ctx.fillRect(x, y + TILE-6, TILE-2, 4);
+    ctx.fillRect(x + TILE-6, y, 4, TILE-2);
+    ctx.globalAlpha = 1;
+  }
+
+  function draw(){
+    ctx.fillStyle = '#0a0a14';
+    ctx.fillRect(0, 0, W, H);
+
+    // 边框
+    ctx.strokeStyle = '#3a3a5a';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(OFFSET_X-1, OFFSET_Y-1, COLS*TILE+2, ROWS*TILE+2);
+
+    // 网格
+    ctx.strokeStyle = 'rgba(255,255,255,.04)';
+    ctx.lineWidth = 1;
+    for (let c=0; c<=COLS; c++){
+      ctx.beginPath();
+      ctx.moveTo(OFFSET_X + c*TILE, OFFSET_Y);
+      ctx.lineTo(OFFSET_X + c*TILE, OFFSET_Y + ROWS*TILE);
+      ctx.stroke();
+    }
+    for (let r=0; r<=ROWS; r++){
+      ctx.beginPath();
+      ctx.moveTo(OFFSET_X, OFFSET_Y + r*TILE);
+      ctx.lineTo(OFFSET_X + COLS*TILE, OFFSET_Y + r*TILE);
+      ctx.stroke();
+    }
+
+    // 已固定的方块
+    for (let r=0; r<ROWS; r++)
+      for (let c=0; c<COLS; c++)
+        if (board[r][c])
+          drawBlock(OFFSET_X + c*TILE, OFFSET_Y + r*TILE, COLORS[board[r][c]]);
+
+    // 当前方块
+    if (current){
+      current.shape.forEach((row, r) => {
+        row.forEach((v, c) => {
+          if (v){
+            const x = OFFSET_X + (current.x + c)*TILE;
+            const y = OFFSET_Y + (current.y + r)*TILE;
+            if (current.y + r >= 0) drawBlock(x, y, COLORS[current.type]);
+          }
+        });
+      });
+    }
+
+    // 下一个方块预览
+    ctx.fillStyle = 'rgba(0,0,0,.4)';
+    ctx.fillRect(W - 110, 20, 100, 100);
+    ctx.strokeStyle = '#3a3a5a';
+    ctx.strokeRect(W - 110, 20, 100, 100);
+    ctx.fillStyle = '#aaa';
+    ctx.font = '12px monospace';
+    ctx.textAlign = 'left';
+    ctx.fillText('NEXT', W - 100, 36);
+    if (next){
+      const px = W - 105, py = 55;
+      next.shape.forEach((row, r) => {
+        row.forEach((v, c) => {
+          if (v){
+            ctx.fillStyle = COLORS[next.type];
+            ctx.fillRect(px + c*18, py + r*18, 16, 16);
+          }
+        });
+      });
+    }
+
+    // 分数
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 16px monospace';
+    ctx.textAlign = 'left';
+    ctx.fillText('分数: ' + score, 10, H - 60);
+    ctx.fillText('消行: ' + lines, 10, H - 38);
+    ctx.fillText('等级: ' + level, 10, H - 16);
+
+    // 状态覆盖
+    if (gameState === 'gameover'){
+      ctx.fillStyle = 'rgba(0,0,0,.75)';
+      ctx.fillRect(0, 0, W, H);
+      ctx.fillStyle = '#ff6b6b';
+      ctx.font = 'bold 40px "Microsoft YaHei", monospace';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('💀 游戏结束', W/2, H/2 - 20);
+      ctx.fillStyle = '#fff';
+      ctx.font = '20px "Microsoft YaHei", monospace';
+      ctx.fillText('按 R 重新开始', W/2, H/2 + 40);
+    }
+  }
+
+  window.addEventListener('keydown', e => {
+    if (gameState !== 'playing'){
+      if (e.key === 'r' || e.key === 'R'){ initLevel(); }
+      return;
+    }
+    switch(e.key){
+      case 'ArrowLeft': move(-1, 0); e.preventDefault(); break;
+      case 'ArrowRight': move(1, 0); e.preventDefault(); break;
+      case 'ArrowDown': if (move(0, 1)) { dropTimer = 0; } e.preventDefault(); break;
+      case 'ArrowUp': tryRotate(); e.preventDefault(); break;
+      case ' ': hardDrop(); e.preventDefault(); break;
+      case 'r': case 'R': initLevel(); break;
+    }
+  });
+
+  initLevel();
+
+  let lastTime = 0;
+  function gameLoop(now){
+    const dt = Math.min(now - lastTime, 50);
+    lastTime = now;
+    update(dt);
+    draw();
+    requestAnimationFrame(gameLoop);
+  }
+  requestAnimationFrame(gameLoop);
+})();
+</script>
+</body>
+</html>

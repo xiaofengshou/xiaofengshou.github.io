@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>贪吃蛇 · 小丰收</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:#1a1a2a; display:flex; justify-content:center; align-items:center; min-height:100vh; font-family:"Microsoft YaHei",monospace; overflow:hidden; }
+  .game-wrapper { position:relative; background:#2a2a3a; border-radius:16px; padding:16px; box-shadow:0 0 40px rgba(0,0,0,.8); }
+  canvas { display:block; margin:0 auto; border-radius:8px; image-rendering:pixelated; background:#0a1a0a; }
+  .back-link { position:absolute; top:-44px; right:0; color:#fff; background:rgba(255,255,255,.1); padding:6px 16px; border-radius:20px; text-decoration:none; font-size:14px; border:1px solid rgba(255,255,255,.15); }
+  .back-link:hover { background:rgba(255,255,255,.2); }
+  .controls-hint { text-align:center; color:#aaa; margin-top:12px; font-size:14px; letter-spacing:1px; }
+  .controls-hint kbd { background:#444; padding:2px 8px; border-radius:4px; color:#eee; font-family:monospace; }
+</style>
+</head>
+<body>
+<div class="game-wrapper">
+  <a class="back-link" href="../index.html">← 返回小丰收</a>
+  <canvas id="gameCanvas" width="480" height="480"></canvas>
+  <div class="controls-hint">
+    <kbd>←</kbd><kbd>→</kbd><kbd>↑</kbd><kbd>↓</kbd> 控制方向 &nbsp;|&nbsp; <kbd>R</kbd> 重开
+  </div>
+</div>
+<script>
+(function(){
+  const canvas = document.getElementById('gameCanvas');
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  const COLS = 20, ROWS = 20;
+  const TILE = W / COLS;
+
+  let snake, dir, nextDir, food, score, gameState, moveTimer, moveInterval, lastTime, speedUpCounter;
+
+  function initLevel(){
+    snake = [
+      { x: 10, y: 10 },
+      { x: 9, y: 10 },
+      { x: 8, y: 10 }
+    ];
+    dir = { x: 1, y: 0 };
+    nextDir = { x: 1, y: 0 };
+    score = 0;
+    gameState = 'playing';
+    moveTimer = 0;
+    moveInterval = 150;
+    speedUpCounter = 0;
+    spawnFood();
+  }
+
+  function spawnFood(){
+    let ok = false, fx, fy;
+    while (!ok){
+      fx = Math.floor(Math.random()*COLS);
+      fy = Math.floor(Math.random()*ROWS);
+      ok = !snake.some(s => s.x === fx && s.y === fy);
+    }
+    food = { x: fx, y: fy, pulse: 0 };
+  }
+
+  function update(dt){
+    if (gameState !== 'playing') return;
+
+    moveTimer += dt;
+    if (moveTimer < moveInterval) return;
+    moveTimer = 0;
+
+    // 应用方向
+    dir = nextDir;
+
+    const head = { x: snake[0].x + dir.x, y: snake[0].y + dir.y };
+
+    // 撞墙
+    if (head.x < 0 || head.x >= COLS || head.y < 0 || head.y >= ROWS){
+      gameState = 'gameover';
+      return;
+    }
+
+    // 撞自己（排除尾巴即将移动的位置）
+    for (let i = 0; i < snake.length - 1; i++){
+      if (snake[i].x === head.x && snake[i].y === head.y){
+        gameState = 'gameover';
+        return;
+      }
+    }
+
+    snake.unshift(head);
+
+    // 吃到食物
+    if (head.x === food.x && head.y === food.y){
+      score += 10;
+      speedUpCounter++;
+      spawnFood();
+      if (speedUpCounter >= 5){
+        speedUpCounter = 0;
+        moveInterval = Math.max(60, moveInterval - 10);
+      }
+    } else {
+      snake.pop();
+    }
+  }
+
+  function draw(){
+    // 背景
+    ctx.fillStyle = '#0a1a0a';
+    ctx.fillRect(0, 0, W, H);
+
+    // 网格
+    ctx.strokeStyle = 'rgba(100,255,100,.06)';
+    ctx.lineWidth = 1;
+    for (let i=0; i<=COLS; i++){
+      ctx.beginPath();
+      ctx.moveTo(i*TILE, 0); ctx.lineTo(i*TILE, H);
+      ctx.stroke();
+    }
+    for (let i=0; i<=ROWS; i++){
+      ctx.beginPath();
+      ctx.moveTo(0, i*TILE); ctx.lineTo(W, i*TILE);
+      ctx.stroke();
+    }
+
+    // 食物
+    if (food){
+      const pulse = 1 + Math.sin(Date.now()/200)*0.15;
+      const cx = food.x*TILE + TILE/2;
+      const cy = food.y*TILE + TILE/2;
+      const r = (TILE/2 - 2) * pulse;
+      ctx.fillStyle = '#e84a4a';
+      ctx.beginPath();
+      ctx.arc(cx, cy, r, 0, Math.PI*2);
+      ctx.fill();
+      ctx.fillStyle = '#ff8a8a';
+      ctx.beginPath();
+      ctx.arc(cx - r*0.25, cy - r*0.25, r*0.3, 0, Math.PI*2);
+      ctx.fill();
+      // 叶子
+      ctx.fillStyle = '#4ae84a';
+      ctx.beginPath();
+      ctx.ellipse(cx + r*0.5, cy - r*0.7, r*0.3, r*0.15, Math.PI/4, 0, Math.PI*2);
+      ctx.fill();
+    }
+
+    // 蛇
+    snake.forEach((s, i) => {
+      const x = s.x * TILE;
+      const y = s.y * TILE;
+      const isHead = i === 0;
+      // 身体颜色渐变
+      const t = i / snake.length;
+      const r = Math.round(60 + t * 40);
+      const g = Math.round(200 - t * 80);
+      const b = Math.round(60 + t * 40);
+      ctx.fillStyle = isHead ? '#6aff6a' : `rgb(${r},${g},${b})`;
+      // 圆角矩形
+      const pad = 1;
+      const rad = isHead ? 6 : 4;
+      roundRect(x+pad, y+pad, TILE-pad*2, TILE-pad*2, rad);
+      ctx.fill();
+      // 高光
+      ctx.fillStyle = 'rgba(255,255,255,.2)';
+      roundRect(x+pad+2, y+pad+2, TILE-pad*2-4, (TILE-pad*2)/3, 3);
+      ctx.fill();
+
+      // 眼睛
+      if (isHead){
+        ctx.fillStyle = '#fff';
+        const eyeSize = 4;
+        const ex = x + TILE/2, ey = y + TILE/2;
+        // 根据方向决定眼睛位置
+        let e1x = ex, e1y = ey, e2x = ex, e2y = ey;
+        if (dir.x === 1){ e1x = ex + 4; e1y = ey - 5; e2x = ex + 4; e2y = ey + 5; }
+        else if (dir.x === -1){ e1x = ex - 4; e1y = ey - 5; e2x = ex - 4; e2y = ey + 5; }
+        else if (dir.y === 1){ e1x = ex - 5; e1y = ey + 4; e2x = ex + 5; e2y = ey + 4; }
+        else { e1x = ex - 5; e1y = ey - 4; e2x = ex + 5; e2y = ey - 4; }
+        ctx.beginPath(); ctx.arc(e1x, e1y, eyeSize, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.arc(e2x, e2y, eyeSize, 0, Math.PI*2); ctx.fill();
+        ctx.fillStyle = '#000';
+        ctx.beginPath(); ctx.arc(e1x, e1y, 2, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.arc(e2x, e2y, 2, 0, Math.PI*2); ctx.fill();
+      }
+    });
+
+    // HUD
+    ctx.fillStyle = 'rgba(0,0,0,.5)';
+    ctx.fillRect(10, 10, 160, 36);
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 18px monospace';
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('得分: ' + score, 20, 28);
+
+    // 状态覆盖
+    if (gameState === 'gameover'){
+      ctx.fillStyle = 'rgba(0,0,0,.75)';
+      ctx.fillRect(0, 0, W, H);
+      ctx.fillStyle = '#ff6b6b';
+      ctx.font = 'bold 44px "Microsoft YaHei", monospace';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('💀 游戏结束', W/2, H/2 - 30);
+      ctx.fillStyle = '#fff';
+      ctx.font = '22px "Microsoft YaHei", monospace';
+      ctx.fillText('得分: ' + score, W/2, H/2 + 20);
+      ctx.fillText('按 R 重新开始', W/2, H/2 + 60);
+    }
+  }
+
+  function roundRect(x, y, w, h, r){
+    ctx.beginPath();
+    ctx.moveTo(x+r, y);
+    ctx.lineTo(x+w-r, y);
+    ctx.arcTo(x+w, y, x+w, y+r, r);
+    ctx.lineTo(x+w, y+h-r);
+    ctx.arcTo(x+w, y+h, x+w-r, y+h, r);
+    ctx.lineTo(x+r, y+h);
+    ctx.arcTo(x, y+h, x, y+h-r, r);
+    ctx.lineTo(x, y+r);
+    ctx.arcTo(x, y, x+r, y, r);
+    ctx.closePath();
+  }
+
+  window.addEventListener('keydown', e => {
+    if (e.key === 'r' || e.key === 'R'){ initLevel(); return; }
+    if (gameState !== 'playing') return;
+
+    // 防止 180 度转向
+    const canChange = (dx, dy) => !(dir.x === -dx && dir.y === -dy);
+
+    switch(e.key){
+      case 'ArrowLeft':
+        if (canChange(-1, 0)) nextDir = { x: -1, y: 0 };
+        e.preventDefault(); break;
+      case 'ArrowRight':
+        if (canChange(1, 0)) nextDir = { x: 1, y: 0 };
+        e.preventDefault(); break;
+      case 'ArrowUp':
+        if (canChange(0, -1)) nextDir = { x: 0, y: -1 };
+        e.preventDefault(); break;
+      case 'ArrowDown':
+        if (canChange(0, 1)) nextDir = { x: 0, y: 1 };
+        e.preventDefault(); break;
+    }
+  });
+
+  initLevel();
+  lastTime = 0;
+  function gameLoop(now){
+    const dt = Math.min(now - lastTime, 50);
+    lastTime = now;
+    update(dt);
+    draw();
+    requestAnimationFrame(gameLoop);
+  }
+  requestAnimationFrame(gameLoop);
+})();
+</script>
+</body>
+</html>
